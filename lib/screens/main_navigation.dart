@@ -1,3 +1,4 @@
+import 'package:binder/services/photo_service.dart';
 import 'package:binder/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -15,6 +16,10 @@ class MainNavigationState extends State<MainNavigation> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("test photo manager");
+    PhotoService().requestPermissions();
+    final albums = PhotoService().fetchAlbums();
+    debugPrint("albums: ${albums.toString()}");
     return Scaffold(
       body: IndexedStack(children: []),
       bottomNavigationBar: Container(
