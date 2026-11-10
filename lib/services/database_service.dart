@@ -7,7 +7,9 @@ import 'package:sqflite/sqflite.dart';
 // https://docs.flutter.dev/cookbook/persistence/sqlite#example
 // https://pub.dev/packages/sqflite
 class DatabaseService {
-  Database? _database;
+  // changed to static para isang instance lang ng Database connection mabubukas
+  // kahit maraming gumagamit ng service na to'
+  static Database? _database;
 
   Future<Database> getDatabase() async {
     // if the database is already opened, just return it
@@ -15,8 +17,6 @@ class DatabaseService {
     if (_database != null) {
       return _database!;
     }
-
-    // otherwise, initialize and open it
     _database = await _initDatabase();
     return _database!;
   }
