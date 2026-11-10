@@ -24,6 +24,8 @@ class PhotoService {
     }
   }
 
+  // this simply fetches the albums in your phone!
+  // through this AssetPathEntity (album), we can get each AssetEntity (photo)
   Future<List<AssetPathEntity>> fetchAlbums() async {
     if (!_hasPermission) {
       await requestPermissions();
