@@ -86,19 +86,34 @@ class TodoController {
     bool deletePhotos = false,
   }) async {
     List<TodoAttachment> updatedAttachments = todo.attachments;
-    //delete directly from native Camera Roll:
+
     if (deletePhotos) {
       final photoService = PhotoService();
+
       for (final att in todo.attachments) {
-        await photoService.deleteAssetFromDevice(att.assetId);
+        //check if any OTHER task in our list is using this same photo!
+        final isUsedInOtherTodo = _todos.any(
+          (t) =>
+              t.id != todo.id &&
+              t.attachments.any((a) => a.assetId == att.assetId),
+        );
+
+        // and only delete from the iPhone Camera Roll if NO other task is using it!
+        if (!isUsedInOtherTodo) {
+          await photoService.deleteAssetFromDevice(att.assetId);
+        }
       }
+
+      // remove the attachments from this completed task
       updatedAttachments = const [];
     }
+
     final updatedTodo = todo.copyWith(
       isCompleted: isCompleted,
       attachments: updatedAttachments,
     );
     await _repo.updateTodo(updatedTodo);
+
     final index = _todos.indexWhere((t) => t.id == todo.id);
     if (index != -1) {
       _todos[index] = updatedTodo;
