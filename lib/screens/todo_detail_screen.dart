@@ -6,6 +6,7 @@ import 'package:binder/services/photo_service.dart';
 import 'package:binder/theme/app_theme.dart';
 import 'package:binder/utils/color_utils.dart';
 import 'package:binder/utils/format_utils.dart';
+import 'package:binder/utils/photo_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
@@ -420,11 +421,14 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
             future: AssetEntity.fromId(att.assetId),
             builder: (context, snapshot) {
               if (snapshot.hasData && snapshot.data != null) {
-                return AssetEntityImage(
-                  snapshot.data!,
-                  isOriginal: false,
-                  thumbnailSize: const ThumbnailSize.square(200),
-                  fit: BoxFit.cover,
+                return GestureDetector(
+                  onTap: () => PhotoUtils.openImageViewer(context, att),
+                  child: AssetEntityImage(
+                    snapshot.data!,
+                    isOriginal: false,
+                    thumbnailSize: const ThumbnailSize.square(200),
+                    fit: BoxFit.cover,
+                  ),
                 );
               }
               return Container(color: AppTheme.surface);
