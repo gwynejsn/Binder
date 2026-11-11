@@ -1,4 +1,4 @@
-import 'package:binder/controllers/todos_controller.dart';
+import 'package:binder/screens/todo_screen.dart';
 import 'package:binder/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -13,16 +13,11 @@ class MainNavigation extends StatefulWidget {
 
 class MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
-  final TodosController _todosController = TodosController();
 
   @override
   Widget build(BuildContext context) {
-    _todosController.loadTodos();
     return Scaffold(
-      body: IndexedStack(children: [
-
-        ],
-      ),
+      body: IndexedStack(children: [TodoScreen()]),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.only(left: 20, right: 20, bottom: 30, top: 4),
         child: _navigationBar(),

@@ -4,7 +4,7 @@ import 'package:binder/models/todo_attachment.dart';
 import 'package:binder/models/todo_item.dart';
 import 'package:binder/repositories/todo_repository.dart';
 
-class TodosController {
+class TodoController {
   final TodoRepository _repo = TodoRepository();
 
   List<TodoItem> _todos = [];
