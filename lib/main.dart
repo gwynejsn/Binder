@@ -2,7 +2,7 @@ import 'package:binder/screens/main_navigation.dart';
 import 'package:binder/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+void main() async {
   runApp(const BinderApp());
 }
 

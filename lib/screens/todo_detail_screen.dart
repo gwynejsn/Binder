@@ -1,14 +1,13 @@
-import 'dart:io';
-
 import 'package:binder/controllers/todo_controller.dart';
 import 'package:binder/models/enums/priority.dart';
 import 'package:binder/models/todo_attachment.dart';
 import 'package:binder/models/todo_item.dart';
+import 'package:binder/services/photo_service.dart';
 import 'package:binder/theme/app_theme.dart';
 import 'package:binder/utils/color_utils.dart';
 import 'package:binder/utils/format_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 class TodoDetailScreen extends StatefulWidget {
   final TodoItem todo;
@@ -25,8 +24,6 @@ class TodoDetailScreen extends StatefulWidget {
 }
 
 class _TodoDetailScreenState extends State<TodoDetailScreen> {
-  final ImagePicker _picker = ImagePicker();
-
   late TextEditingController _titleController;
   late TextEditingController _notesController;
 
@@ -68,12 +65,10 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
   }
 
   Future<void> _pickPhotos() async {
-    final List<XFile> pickedImages = await _picker.pickMultiImage();
-    if (pickedImages.isNotEmpty) {
+    final newPhotos = await PhotoService().pickPhotos(context);
+    if (newPhotos.isNotEmpty) {
       setState(() {
-        for (final img in pickedImages) {
-          _attachments.add(TodoAttachment(path: img.path));
-        }
+        _attachments.addAll(newPhotos);
       });
     }
   }
@@ -421,12 +416,21 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: att.path != null
-                ? Image.file(File(att.path!), fit: BoxFit.cover)
-                : Container(color: AppTheme.surface),
+          FutureBuilder<AssetEntity?>(
+            future: AssetEntity.fromId(att.assetId),
+            builder: (context, snapshot) {
+              if (snapshot.hasData && snapshot.data != null) {
+                return AssetEntityImage(
+                  snapshot.data!,
+                  isOriginal: false,
+                  thumbnailSize: const ThumbnailSize.square(200),
+                  fit: BoxFit.cover,
+                );
+              }
+              return Container(color: AppTheme.surface);
+            },
           ),
+
           Positioned(
             top: 2,
             right: 2,

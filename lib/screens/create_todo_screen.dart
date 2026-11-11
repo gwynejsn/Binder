@@ -1,13 +1,12 @@
-import 'dart:io';
-
 import 'package:binder/controllers/todo_controller.dart';
 import 'package:binder/models/enums/priority.dart';
 import 'package:binder/models/todo_attachment.dart';
+import 'package:binder/services/photo_service.dart';
 import 'package:binder/theme/app_theme.dart';
 import 'package:binder/utils/color_utils.dart';
 import 'package:binder/utils/format_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 class CreateTodoScreen extends StatefulWidget {
   final TodoController controller;
@@ -21,7 +20,6 @@ class CreateTodoScreen extends StatefulWidget {
 class _CreateTaskScreenState extends State<CreateTodoScreen> {
   final _titleController = TextEditingController();
   final _notesController = TextEditingController();
-  final ImagePicker _picker = ImagePicker();
 
   Priority _selectedPriority = Priority.medium;
   DateTime? _selectedDeadline;
@@ -72,13 +70,10 @@ class _CreateTaskScreenState extends State<CreateTodoScreen> {
   // we used this to pick photos
   // https://pub.dev/packages/image_picker
   Future<void> _pickPhotos() async {
-    final List<XFile> pickedImages = await _picker.pickMultiImage();
-
-    if (pickedImages.isNotEmpty) {
+    final newPhotos = await PhotoService().pickPhotos(context);
+    if (newPhotos.isNotEmpty) {
       setState(() {
-        for (final image in pickedImages) {
-          _attachments.add(TodoAttachment(path: image.path));
-        }
+        _attachments.addAll(newPhotos);
       });
     }
   }
@@ -278,7 +273,7 @@ class _CreateTaskScreenState extends State<CreateTodoScreen> {
 
                   // display photo preview for each image selected
                   for (int i = 0; i < _attachments.length; i++)
-                    _buildPhotoItem(i),
+                    buildPhotoItem(i),
                 ],
               ),
             ),
@@ -288,7 +283,7 @@ class _CreateTaskScreenState extends State<CreateTodoScreen> {
     );
   }
 
-  Widget _buildPhotoItem(int index) {
+  Widget buildPhotoItem(int index) {
     final attachment = _attachments[index];
 
     return Container(
@@ -298,9 +293,20 @@ class _CreateTaskScreenState extends State<CreateTodoScreen> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          attachment.path != null
-              ? Image.file(File(attachment.path!), fit: BoxFit.cover)
-              : Container(color: AppTheme.surface),
+          FutureBuilder<AssetEntity?>(
+            future: AssetEntity.fromId(attachment.assetId),
+            builder: (context, snapshot) {
+              if (snapshot.hasData && snapshot.data != null) {
+                return AssetEntityImage(
+                  snapshot.data!,
+                  isOriginal: false,
+                  thumbnailSize: const ThumbnailSize.square(200),
+                  fit: BoxFit.cover,
+                );
+              }
+              return Container(color: AppTheme.surface);
+            },
+          ),
 
           // delete (X) button
           Positioned(

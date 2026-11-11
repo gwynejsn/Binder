@@ -3,6 +3,7 @@ import 'package:binder/models/enums/todo_filter.dart';
 import 'package:binder/models/todo_attachment.dart';
 import 'package:binder/models/todo_item.dart';
 import 'package:binder/repositories/todo_repository.dart';
+import 'package:binder/services/photo_service.dart';
 
 class TodoController {
   final TodoRepository _repo = TodoRepository();
@@ -78,26 +79,29 @@ class TodoController {
     return newTodo;
   }
 
-  // Toggle task completed state
-  Future<void> toggleComplete(String id, bool isCompleted) async {
-    await _repo.toggleComplete(id, isCompleted);
-
-    // update what is in our list
-    final index = _todos.indexWhere((t) => t.id == id);
+  //toggle task completed state
+  Future<void> toggleComplete(
+    TodoItem todo,
+    bool isCompleted, {
+    bool deletePhotos = false,
+  }) async {
+    List<TodoAttachment> updatedAttachments = todo.attachments;
+    //delete directly from native Camera Roll:
+    if (deletePhotos) {
+      final photoService = PhotoService();
+      for (final att in todo.attachments) {
+        await photoService.deleteAssetFromDevice(att.assetId);
+      }
+      updatedAttachments = const [];
+    }
+    final updatedTodo = todo.copyWith(
+      isCompleted: isCompleted,
+      attachments: updatedAttachments,
+    );
+    await _repo.updateTodo(updatedTodo);
+    final index = _todos.indexWhere((t) => t.id == todo.id);
     if (index != -1) {
-      final existing = _todos[index];
-      _todos[index] = TodoItem(
-        id: existing.id,
-        title: existing.title,
-        notes: existing.notes,
-        priority: existing.priority,
-        deadline: existing.deadline,
-        binderId: existing.binderId,
-        isCompleted: isCompleted,
-        completedPomodoros: existing.completedPomodoros,
-        createdAt: existing.createdAt,
-        attachments: existing.attachments,
-      );
+      _todos[index] = updatedTodo;
     }
   }
 

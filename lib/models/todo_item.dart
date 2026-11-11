@@ -26,4 +26,30 @@ class TodoItem {
     this.completedPomodoros = 0,
     required this.createdAt,
   });
+
+  TodoItem copyWith({
+    String? title,
+    String? notes,
+    Priority? priority,
+    DateTime? deadline,
+    bool clearDeadline = false,
+    List<TodoAttachment>? attachments,
+    String? binderId,
+    bool clearBinder = false,
+    bool? isCompleted,
+    int? completedPomodoros,
+  }) {
+    return TodoItem(
+      id: id,
+      title: title ?? this.title,
+      notes: notes ?? this.notes,
+      priority: priority ?? this.priority,
+      deadline: clearDeadline ? null : (deadline ?? this.deadline),
+      attachments: attachments ?? this.attachments,
+      binderId: clearBinder ? null : (binderId ?? this.binderId),
+      isCompleted: isCompleted ?? this.isCompleted,
+      completedPomodoros: completedPomodoros ?? this.completedPomodoros,
+      createdAt: createdAt,
+    );
+  }
 }

@@ -28,11 +28,7 @@ class TodoRepository {
       );
 
       final attachments = attachmentRows.map((attRow) {
-        return TodoAttachment(
-          path: attRow['path'] as String?,
-          assetId: attRow['asset_id'] as String?,
-          thumbUri: attRow['thumb_uri'] as String?,
-        );
+        return TodoAttachment(assetId: attRow['asset_id'] as String);
       }).toList();
 
       // convert Priority string back to enum
@@ -84,9 +80,7 @@ class TodoRepository {
       if (att.isValid) {
         await db.insert('todo_attachments', {
           'todo_id': todo.id,
-          'path': att.path,
           'asset_id': att.assetId,
-          'thumb_uri': att.thumbUri,
         });
       }
     }
@@ -134,9 +128,7 @@ class TodoRepository {
       if (att.isValid) {
         await db.insert('todo_attachments', {
           'todo_id': todo.id,
-          'path': att.path,
           'asset_id': att.assetId,
-          'thumb_uri': att.thumbUri,
         });
       }
     }

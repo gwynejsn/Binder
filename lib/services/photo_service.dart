@@ -1,5 +1,6 @@
+import 'package:binder/models/todo_attachment.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:photo_manager/photo_manager.dart';
+import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 class PhotoService {
   static bool _hasPermission = false;
@@ -69,6 +70,35 @@ class PhotoService {
     } catch (e) {
       debugPrint('Error fetching photos: $e');
       return [];
+    }
+  }
+
+  // earlier gamit natin is image_picker, but we switched to
+  // https://pub.dev/packages/wechat_assets_picker
+  // kasi same yung path na ginagamit ng photo_manager and wechat_assets_picker
+  // which removes the bug kanina with paths!
+  Future<List<TodoAttachment>> pickPhotos(
+    BuildContext context, {
+    int maxAssets = 5,
+  }) async {
+    final List<AssetEntity>? results = await AssetPicker.pickAssets(
+      context,
+      pickerConfig: AssetPickerConfig(
+        maxAssets: maxAssets,
+        requestType: RequestType.image,
+      ),
+    );
+    if (results == null || results.isEmpty) return [];
+    return results.map((asset) => TodoAttachment(assetId: asset.id)).toList();
+  }
+
+  Future<bool> deleteAssetFromDevice(String assetId) async {
+    try {
+      final result = await PhotoManager.editor.deleteWithIds([assetId]);
+      return result.isNotEmpty;
+    } catch (e) {
+      debugPrint('Error deleting asset: $e');
+      return false;
     }
   }
 }
