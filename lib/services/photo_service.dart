@@ -57,4 +57,18 @@ class PhotoService {
       return [];
     }
   }
+
+  // fetches a page of photos (AssetEntity) inside an album (AssetPathEntity)
+  Future<List<AssetEntity>> fetchAssetsForAlbum(
+    AssetPathEntity album, {
+    int page = 0,
+    int pageSize = 60,
+  }) async {
+    try {
+      return await album.getAssetListPaged(page: page, size: pageSize);
+    } catch (e) {
+      debugPrint('Error fetching photos: $e');
+      return [];
+    }
+  }
 }

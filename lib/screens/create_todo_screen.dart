@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:binder/controllers/todo_controller.dart';
 import 'package:binder/models/enums/priority.dart';
 import 'package:binder/models/todo_attachment.dart';
 import 'package:binder/theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class CreateTodoScreen extends StatefulWidget {
   final TodoController controller;
@@ -16,6 +19,7 @@ class CreateTodoScreen extends StatefulWidget {
 class _CreateTaskScreenState extends State<CreateTodoScreen> {
   final _titleController = TextEditingController();
   final _notesController = TextEditingController();
+  final ImagePicker _picker = ImagePicker();
 
   Priority _selectedPriority = Priority.medium;
   DateTime? _selectedDeadline;
@@ -60,6 +64,20 @@ class _CreateTaskScreenState extends State<CreateTodoScreen> {
     );
     if (picked != null) {
       setState(() => _selectedDeadline = picked);
+    }
+  }
+
+  // we used this to pick photos
+  // https://pub.dev/packages/image_picker
+  Future<void> _pickPhotos() async {
+    final List<XFile> pickedImages = await _picker.pickMultiImage();
+
+    if (pickedImages.isNotEmpty) {
+      setState(() {
+        for (final image in pickedImages) {
+          _attachments.add(TodoAttachment(path: image.path));
+        }
+      });
     }
   }
 
@@ -223,8 +241,88 @@ class _CreateTaskScreenState extends State<CreateTodoScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 24),
+
+            // attachments
+            Text('ATTACHMENTS', style: AppTheme.overline(fontSize: 11)),
+            const SizedBox(height: 10),
+
+            SizedBox(
+              height: 72,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  // add photo button
+                  GestureDetector(
+                    onTap: _pickPhotos,
+                    child: Container(
+                      width: 72,
+                      height: 72,
+                      margin: const EdgeInsets.only(right: 8),
+                      decoration: BoxDecoration(
+                        color: AppTheme.surface,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppTheme.border),
+                      ),
+                      child: const Icon(
+                        Icons.add_a_photo_outlined,
+                        color: AppTheme.terracotta,
+                        size: 24,
+                      ),
+                    ),
+                  ),
+
+                  // display photo preview for each image selected
+                  for (int i = 0; i < _attachments.length; i++)
+                    _buildPhotoItem(i),
+                ],
+              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildPhotoItem(int index) {
+    final attachment = _attachments[index];
+
+    return Container(
+      width: 72,
+      height: 72,
+      margin: const EdgeInsets.only(right: 8),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          attachment.path != null
+              ? Image.file(File(attachment.path!), fit: BoxFit.cover)
+              : Container(color: AppTheme.surface),
+
+          // delete (X) button
+          Positioned(
+            top: 2,
+            right: 2,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _attachments.removeAt(index);
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: const BoxDecoration(
+                  color: Colors.black54,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.close_rounded,
+                  size: 14,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
