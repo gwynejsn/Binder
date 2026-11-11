@@ -4,6 +4,8 @@ import 'package:binder/controllers/todo_controller.dart';
 import 'package:binder/models/enums/priority.dart';
 import 'package:binder/models/todo_attachment.dart';
 import 'package:binder/theme/app_theme.dart';
+import 'package:binder/utils/color_utils.dart';
+import 'package:binder/utils/format_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -179,7 +181,7 @@ class _CreateTaskScreenState extends State<CreateTodoScreen> {
                       ),
                     ),
                     selected: isSelected,
-                    selectedColor: _priorityColor(priority),
+                    selectedColor: ColorUtils.priorityColor(priority),
                     backgroundColor: AppTheme.surface,
                     onSelected: (val) {
                       if (val) {
@@ -219,7 +221,9 @@ class _CreateTaskScreenState extends State<CreateTodoScreen> {
                       child: Text(
                         _selectedDeadline == null
                             ? 'No deadline set'
-                            : _formatDate(_selectedDeadline!),
+                            : FormatUtils.formatDateWithYear(
+                                _selectedDeadline!,
+                              ),
                         style: AppTheme.sans(
                           color: _selectedDeadline == null
                               ? AppTheme.textSecondary
@@ -325,34 +329,5 @@ class _CreateTaskScreenState extends State<CreateTodoScreen> {
         ],
       ),
     );
-  }
-
-  Color _priorityColor(Priority p) {
-    switch (p) {
-      case Priority.high:
-        return AppTheme.rose;
-      case Priority.medium:
-        return AppTheme.wheat;
-      case Priority.low:
-        return AppTheme.sage;
-    }
-  }
-
-  String _formatDate(DateTime dt) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
   }
 }

@@ -5,7 +5,9 @@ import 'package:binder/models/enums/priority.dart';
 import 'package:binder/models/enums/todo_filter.dart';
 import 'package:binder/models/todo_item.dart';
 import 'package:binder/screens/create_todo_screen.dart';
+import 'package:binder/screens/todo_detail_screen.dart';
 import 'package:binder/theme/app_theme.dart';
+import 'package:binder/utils/format_utils.dart';
 import 'package:flutter/material.dart';
 
 class TodoScreen extends StatefulWidget {
@@ -85,7 +87,7 @@ class _TodoScreenState extends State<TodoScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              _formatDateToday(DateTime.now()).toUpperCase(),
+              FormatUtils.formatDateToday(DateTime.now()).toUpperCase(),
               style: AppTheme.overline(
                 fontSize: 10,
                 color: AppTheme.terracottaLight,
@@ -203,127 +205,132 @@ class _TodoScreenState extends State<TodoScreen> {
         child: const Icon(Icons.delete_outline_rounded, color: Colors.white),
       ),
       onDismissed: (_) => _deleteTodo(todo.id),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: AppTheme.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.border),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // circle checkbox
-            GestureDetector(
-              onTap: () => _toggleComplete(todo, !todo.isCompleted),
-              child: Container(
-                width: 24,
-                height: 24,
-                margin: const EdgeInsets.only(top: 2),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: todo.isCompleted ? AppTheme.sage : Colors.transparent,
-                  border: Border.all(
+      child: GestureDetector(
+        onTap: () => _openTodoDetails(todo),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: AppTheme.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppTheme.border),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // circle checkbox
+              GestureDetector(
+                onTap: () => _toggleComplete(todo, !todo.isCompleted),
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  margin: const EdgeInsets.only(top: 2),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
                     color: todo.isCompleted
                         ? AppTheme.sage
-                        : AppTheme.textTertiary,
-                    width: 2,
+                        : Colors.transparent,
+                    border: Border.all(
+                      color: todo.isCompleted
+                          ? AppTheme.sage
+                          : AppTheme.textTertiary,
+                      width: 2,
+                    ),
                   ),
+                  child: todo.isCompleted
+                      ? const Icon(Icons.check, size: 16, color: Colors.black)
+                      : null,
                 ),
-                child: todo.isCompleted
-                    ? const Icon(Icons.check, size: 16, color: Colors.black)
-                    : null,
               ),
-            ),
-            const SizedBox(width: 12),
+              const SizedBox(width: 12),
 
-            // content
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.only(right: 12),
-                        padding: const EdgeInsets.symmetric(horizontal: 6),
-                        decoration: BoxDecoration(
-                          color: _priorityColor(todo.priority)
-                              .withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
+              // content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(right: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          decoration: BoxDecoration(
                             color: _priorityColor(todo.priority)
-                                .withValues(alpha: 0.4),
-                          ),
-                        ),
-                        child: Text(
-                          todo.priority.name.toUpperCase(),
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                            color: _priorityColor(todo.priority),
-                          ),
-                        ),
-                      ),
-
-                      // deadline
-                      if (todo.deadline != null)
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.calendar_today_rounded,
-                              size: 11,
-                              color: AppTheme.textSecondary,
+                                .withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: _priorityColor(todo.priority)
+                                  .withValues(alpha: 0.4),
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              _formatDate(todo.deadline!),
-                              style: AppTheme.sans(
-                                fontSize: 11,
+                          ),
+                          child: Text(
+                            todo.priority.name.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              color: _priorityColor(todo.priority),
+                            ),
+                          ),
+                        ),
+
+                        // deadline
+                        if (todo.deadline != null)
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.calendar_today_rounded,
+                                size: 11,
                                 color: AppTheme.textSecondary,
                               ),
-                            ),
-                          ],
-                        ),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-
-                  // title
-                  Text(
-                    todo.title,
-                    style:
-                        AppTheme.sans(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          color: todo.isCompleted
-                              ? AppTheme.textTertiary
-                              : AppTheme.textPrimary,
-                        ).copyWith(
-                          decoration: todo.isCompleted
-                              ? TextDecoration.lineThrough
-                              : null,
-                        ),
-                  ),
-                  if (todo.notes.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      todo.notes,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTheme.sans(
-                        fontSize: 13,
-                        color: AppTheme.textSecondary,
-                      ),
+                              const SizedBox(width: 4),
+                              Text(
+                                FormatUtils.formatDateWithYear(todo.deadline!),
+                                style: AppTheme.sans(
+                                  fontSize: 11,
+                                  color: AppTheme.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                      ],
                     ),
+                    SizedBox(height: 8),
+
+                    // title
+                    Text(
+                      todo.title,
+                      style:
+                          AppTheme.sans(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: todo.isCompleted
+                                ? AppTheme.textTertiary
+                                : AppTheme.textPrimary,
+                          ).copyWith(
+                            decoration: todo.isCompleted
+                                ? TextDecoration.lineThrough
+                                : null,
+                          ),
+                    ),
+                    if (todo.notes.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        todo.notes,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTheme.sans(
+                          fontSize: 13,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 8),
+                    _buildAttachedPhotos(todo),
                   ],
-                  const SizedBox(height: 8),
-                  _buildAttachedPhotos(todo),
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -414,6 +421,20 @@ class _TodoScreenState extends State<TodoScreen> {
     );
   }
 
+  void _openTodoDetails(TodoItem todo) async {
+    final updated = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TodoDetailScreen(todo: todo, controller: _controller),
+      ),
+    );
+
+    // if changes were saved or task was deleted, refresh the list!
+    if (updated == true) {
+      setState(() {});
+    }
+  }
+
   Color _priorityColor(Priority p) {
     switch (p) {
       case Priority.high:
@@ -423,50 +444,5 @@ class _TodoScreenState extends State<TodoScreen> {
       case Priority.low:
         return AppTheme.sage;
     }
-  }
-
-  String _formatDate(DateTime dt) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${months[dt.month - 1]} ${dt.day}';
-  }
-
-  String _formatDateToday(DateTime dt) {
-    const days = [
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-      'Sunday',
-    ];
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${days[dt.weekday - 1]} • ${months[dt.month - 1]} ${dt.day}';
   }
 }
