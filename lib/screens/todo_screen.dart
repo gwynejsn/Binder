@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:binder/controllers/todo_controller.dart';
 import 'package:binder/models/enums/priority.dart';
 import 'package:binder/models/enums/todo_filter.dart';
@@ -241,6 +243,54 @@ class _TodoScreenState extends State<TodoScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Row(
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.only(right: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        decoration: BoxDecoration(
+                          color: _priorityColor(todo.priority)
+                              .withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: _priorityColor(todo.priority)
+                                .withValues(alpha: 0.4),
+                          ),
+                        ),
+                        child: Text(
+                          todo.priority.name.toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: _priorityColor(todo.priority),
+                          ),
+                        ),
+                      ),
+
+                      // deadline
+                      if (todo.deadline != null)
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_today_rounded,
+                              size: 11,
+                              color: AppTheme.textSecondary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              _formatDate(todo.deadline!),
+                              style: AppTheme.sans(
+                                fontSize: 11,
+                                color: AppTheme.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+
+                  // title
                   Text(
                     todo.title,
                     style:
@@ -269,79 +319,7 @@ class _TodoScreenState extends State<TodoScreen> {
                     ),
                   ],
                   const SizedBox(height: 8),
-
-                  Wrap(
-                    spacing: 8,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      // Priority Badge
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _priorityColor(todo.priority)
-                              .withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
-                            color: _priorityColor(todo.priority)
-                                .withValues(alpha: 0.4),
-                          ),
-                        ),
-                        child: Text(
-                          todo.priority.name.toUpperCase(),
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                            color: _priorityColor(todo.priority),
-                          ),
-                        ),
-                      ),
-
-                      // Deadline Badge
-                      if (todo.deadline != null)
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.calendar_today_rounded,
-                              size: 11,
-                              color: AppTheme.textSecondary,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              _formatDate(todo.deadline!),
-                              style: AppTheme.sans(
-                                fontSize: 11,
-                                color: AppTheme.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                      // attachments
-                      if (todo.attachments.isNotEmpty)
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.photo_library_outlined,
-                              size: 12,
-                              color: AppTheme.terracotta,
-                            ),
-                            const SizedBox(width: 3),
-                            Text(
-                              '${todo.attachments.length}',
-                              style: AppTheme.sans(
-                                fontSize: 11,
-                                color: AppTheme.terracotta,
-                              ),
-                            ),
-                          ],
-                        ),
-                    ],
-                  ),
+                  _buildAttachedPhotos(todo),
                 ],
               ),
             ),
@@ -373,6 +351,65 @@ class _TodoScreenState extends State<TodoScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildAttachedPhotos(TodoItem todo) {
+    if (todo.attachments.isEmpty) return const SizedBox.shrink();
+    return Container(
+      height: 72,
+      margin: const EdgeInsets.only(top: 10),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: todo.attachments.length,
+        itemBuilder: (context, index) {
+          final photo = todo.attachments[index];
+          if (photo.path == null)
+            return const SizedBox.shrink(); // .shrink with height and size of 0
+
+          return GestureDetector(
+            onTap: () => _openImageViewer(photo.path!),
+            child: Container(
+              width: 72,
+              height: 72,
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                border: Border.all(color: AppTheme.border),
+              ),
+              child: Image.file(File(photo.path!), fit: BoxFit.cover),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _openImageViewer(String imagePath) {
+    // https://api.flutter.dev/flutter/material/showDialog.html
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.9),
+      // https://api.flutter.dev/flutter/material/Dialog-class.html
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(12),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Image.file(File(imagePath), fit: BoxFit.contain),
+
+            // close button
+            Positioned(
+              top: 10,
+              right: 10,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                onPressed: () => Navigator.pop(ctx),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
