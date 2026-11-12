@@ -2,6 +2,7 @@ import 'package:binder/controllers/binder_controller.dart';
 import 'package:binder/controllers/todo_controller.dart';
 import 'package:binder/models/binder.dart';
 import 'package:binder/models/todo_attachment.dart';
+import 'package:binder/screens/binder/binder_detail_screen.dart';
 import 'package:binder/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
@@ -183,7 +184,12 @@ class _BindersScreenState extends State<BindersScreen> {
     return GestureDetector(
       onTap: () async {
         // clicking the card goes to the detailed screen
-
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => BinderDetailScreen(binderId: binder.id),
+          ),
+        );
         // once it goes back, reload the data
         _loadData();
       },

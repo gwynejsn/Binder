@@ -12,19 +12,15 @@ import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 class TodoDetailScreen extends StatefulWidget {
   final TodoItem todo;
-  final TodoController controller;
 
-  const TodoDetailScreen({
-    super.key,
-    required this.todo,
-    required this.controller,
-  });
+  const TodoDetailScreen({super.key, required this.todo});
 
   @override
   State<TodoDetailScreen> createState() => _TodoDetailScreenState();
 }
 
 class _TodoDetailScreenState extends State<TodoDetailScreen> {
+  final TodoController _todoController = TodoController();
   late TextEditingController _titleController;
   late TextEditingController _notesController;
 
@@ -66,10 +62,12 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
   }
 
   Future<void> _pickPhotos() async {
-    final newPhotos = await PhotoService().pickPhotos(context);
-    if (newPhotos.isNotEmpty) {
+    final assets = await PhotoService().pickPhotos(context, maxAssets: 5);
+    if (assets.isNotEmpty) {
       setState(() {
-        _attachments.addAll(newPhotos);
+        _attachments.addAll(
+          assets.map((asset) => TodoAttachment(assetId: asset.id)),
+        );
       });
     }
   }
@@ -93,7 +91,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
       attachments: _attachments,
     );
 
-    await widget.controller.updateTodo(updated);
+    await _todoController.updateTodo(updated);
 
     if (mounted) {
       Navigator.pop(context, true); // true = changes saved
@@ -134,7 +132,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
     );
 
     if (confirm == true) {
-      await widget.controller.deleteTodo(widget.todo.id);
+      await _todoController.deleteTodo(widget.todo.id);
       if (mounted) {
         Navigator.pop(context, true);
       }
@@ -196,7 +194,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Completion status toggle row
+            // completion status toggle row
             GestureDetector(
               onTap: () => setState(() => _isCompleted = !_isCompleted),
               child: Container(
@@ -250,7 +248,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
             ),
             const SizedBox(height: 16),
 
-            // 2. Title field
+            // title field
             TextField(
               controller: _titleController,
               style: AppTheme.sans(fontSize: 18, fontWeight: FontWeight.w600),
@@ -265,7 +263,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
             ),
             const Divider(color: AppTheme.border, height: 24),
 
-            // 3. Notes field
+            // notes field
             TextField(
               controller: _notesController,
               maxLines: 5,
@@ -282,7 +280,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
             ),
             const Divider(color: AppTheme.border, height: 24),
 
-            // 4. Priority selector
+            // priority selector
             Text('PRIORITY', style: AppTheme.overline(fontSize: 11)),
             const SizedBox(height: 10),
             Row(
@@ -312,7 +310,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
             ),
             const SizedBox(height: 24),
 
-            // 5. Due Date section
+            //Due Date section
             Text('DUE DATE', style: AppTheme.overline(fontSize: 11)),
             const SizedBox(height: 10),
             GestureDetector(
@@ -364,7 +362,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
             ),
             const SizedBox(height: 24),
 
-            // 6. Attachments section
+            // attachments section
             Text(
               'ATTACHMENTS (${_attachments.length})',
               style: AppTheme.overline(fontSize: 11),
@@ -375,7 +373,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
-                  // Add photo button
+                  // add photo button
                   GestureDetector(
                     onTap: _pickPhotos,
                     child: Container(
@@ -395,7 +393,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
                     ),
                   ),
 
-                  // Display attached photos
+                  //display attached photos
                   for (int i = 0; i < _attachments.length; i++)
                     _buildAttachmentItem(i),
                 ],

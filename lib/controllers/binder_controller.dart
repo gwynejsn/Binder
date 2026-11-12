@@ -5,7 +5,7 @@ class BinderController {
   final BinderRepository _repo = BinderRepository();
   // note we are storing the binders in-memory para mas mabilis ma access
   // parang caching or something
-  List<Binder> _binders = [];
+  static List<Binder> _binders = [];
   List<Binder> get allBinders => _binders;
 
   Future<List<Binder>> loadBinders() async {
@@ -14,7 +14,8 @@ class BinderController {
     return _binders;
   }
 
-  Binder? getBinderById(String id) {
+  Binder? getBinderById(String? id) {
+    if (id == null) return null;
     for (final b in _binders) {
       if (b.id == id) return b;
     }

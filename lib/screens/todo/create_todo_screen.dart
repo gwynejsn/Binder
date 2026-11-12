@@ -10,15 +10,14 @@ import 'package:flutter/material.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 class CreateTodoScreen extends StatefulWidget {
-  final TodoController controller;
-
-  const CreateTodoScreen({super.key, required this.controller});
+  const CreateTodoScreen({super.key});
 
   @override
   State<CreateTodoScreen> createState() => _CreateTaskScreenState();
 }
 
 class _CreateTaskScreenState extends State<CreateTodoScreen> {
+  final TodoController _todoController = TodoController();
   final _titleController = TextEditingController();
   final _notesController = TextEditingController();
 
@@ -40,7 +39,7 @@ class _CreateTaskScreenState extends State<CreateTodoScreen> {
 
     setState(() => _isSaving = true);
 
-    await widget.controller.addTodo(
+    await _todoController.addTodo(
       title: title,
       notes: _notesController.text.trim(),
       priority: _selectedPriority,
@@ -68,13 +67,28 @@ class _CreateTaskScreenState extends State<CreateTodoScreen> {
     }
   }
 
-  // we used this to pick photos
-  // https://pub.dev/packages/image_picker
+  Future<List<TodoAttachment>> pickPhotos(
+    BuildContext context, {
+    int maxAssets = 5,
+  }) async {
+    final List<AssetEntity>? results = await AssetPicker.pickAssets(
+      context,
+      pickerConfig: AssetPickerConfig(
+        maxAssets: maxAssets,
+        requestType: RequestType.image,
+      ),
+    );
+    if (results == null || results.isEmpty) return [];
+    return results.map((asset) => TodoAttachment(assetId: asset.id)).toList();
+  }
+
   Future<void> _pickPhotos() async {
-    final newPhotos = await PhotoService().pickPhotos(context);
-    if (newPhotos.isNotEmpty) {
+    final assets = await PhotoService().pickPhotos(context, maxAssets: 5);
+    if (assets.isNotEmpty) {
       setState(() {
-        _attachments.addAll(newPhotos);
+        _attachments.addAll(
+          assets.map((asset) => TodoAttachment(assetId: asset.id)),
+        );
       });
     }
   }

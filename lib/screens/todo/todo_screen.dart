@@ -127,9 +127,7 @@ class _TodoScreenState extends State<TodoScreen> {
     // returns true if saved or false if not
     final created = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(
-        builder: (_) => CreateTodoScreen(controller: _controller),
-      ),
+      MaterialPageRoute(builder: (_) => CreateTodoScreen()),
     );
 
     // after the task was saved, refresh the list
@@ -484,9 +482,7 @@ class _TodoScreenState extends State<TodoScreen> {
   void _openTodoDetails(TodoItem todo) async {
     final updated = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(
-        builder: (_) => TodoDetailScreen(todo: todo, controller: _controller),
-      ),
+      MaterialPageRoute(builder: (_) => TodoDetailScreen(todo: todo)),
     );
 
     // if changes were saved or task was deleted, refresh the list!
