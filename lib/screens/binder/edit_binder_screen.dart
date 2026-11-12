@@ -21,16 +21,6 @@ class _EditBinderScreenState extends State<EditBinderScreen> {
   late TextEditingController _keywordsController;
   late String _selectedColorHex;
 
-  final List<String> _colors = [
-    '0xFF3B82F6', // blue
-    '0xFF10B981', // emerald
-    '0xFFEC4899', // pink
-    '0xFFF59E0B', // amber
-    '0xFF8B5CF6', // purple
-    '0xFFE09F5A', // terracotta
-    '0xFF7D8D70', // sage
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -63,13 +53,13 @@ class _EditBinderScreenState extends State<EditBinderScreen> {
     if (mounted) Navigator.pop(context, 'saved');
   }
 
-  Future<void> _deleteFolder() async {
+  Future<void> _deleteBinder() async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppTheme.surfaceElevated,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Delete Folder?'),
+        title: const Text('Delete Binder?'),
         content: Text(
           'Delete "${widget.binder.name}"? Tasks inside will stay in your Todo list.',
         ),
@@ -104,7 +94,7 @@ class _EditBinderScreenState extends State<EditBinderScreen> {
           onTap: () => Navigator.pop(context),
           child: const Icon(Icons.arrow_back_ios_new, size: 18),
         ),
-        title: Text('Edit Folder', style: AppTheme.serifHeading(fontSize: 20)),
+        title: Text('Edit Binder', style: AppTheme.serifHeading(fontSize: 20)),
         actions: [
           TextButton(
             onPressed: _saveChanges,
@@ -124,7 +114,7 @@ class _EditBinderScreenState extends State<EditBinderScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('FOLDER NAME', style: AppTheme.overline(fontSize: 11)),
+            Text('BINDER NAME', style: AppTheme.overline(fontSize: 11)),
             const SizedBox(height: 8),
             TextField(
               controller: _nameController,
@@ -151,7 +141,7 @@ class _EditBinderScreenState extends State<EditBinderScreen> {
               maxLines: 2,
               style: AppTheme.sans(fontSize: 14),
               decoration: InputDecoration(
-                hintText: 'What goes in this folder...',
+                hintText: 'What goes in this binder...',
                 filled: true,
                 fillColor: AppTheme.surface,
                 border: OutlineInputBorder(
@@ -162,12 +152,12 @@ class _EditBinderScreenState extends State<EditBinderScreen> {
             ),
             const SizedBox(height: 20),
 
-            Text('FOLDER COLOR', style: AppTheme.overline(fontSize: 11)),
+            Text('BINDER COLOR', style: AppTheme.overline(fontSize: 11)),
             const SizedBox(height: 10),
             Wrap(
               spacing: 12,
               runSpacing: 10,
-              children: _colors.map((hex) {
+              children: AppTheme.binderColors.map((hex) {
                 final color = ColorUtils.getColor(hex);
                 final isSelected = _selectedColorHex == hex;
 
@@ -240,7 +230,7 @@ class _EditBinderScreenState extends State<EditBinderScreen> {
 
             Center(
               child: GestureDetector(
-                onTap: _deleteFolder,
+                onTap: _deleteBinder,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
@@ -262,7 +252,7 @@ class _EditBinderScreenState extends State<EditBinderScreen> {
                       ),
                       SizedBox(width: 6),
                       Text(
-                        'Delete Folder',
+                        'Delete Binder',
                         style: TextStyle(
                           color: AppTheme.rose,
                           fontSize: 14,

@@ -8,6 +8,7 @@ import 'package:binder/screens/todo/todo_detail_screen.dart';
 import 'package:binder/services/photo_service.dart';
 import 'package:binder/theme/app_theme.dart';
 import 'package:binder/utils/color_utils.dart';
+import 'package:binder/widgets/todo_card.dart';
 import 'package:flutter/material.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
@@ -309,105 +310,26 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
       itemCount: tasks.length,
       itemBuilder: (context, index) {
         final task = tasks[index];
-        return Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: AppTheme.surface,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppTheme.border),
-          ),
-          child: Row(
-            children: [
-              GestureDetector(
-                onTap: () async {
-                  await _todoController.toggleComplete(task, !task.isCompleted);
-                  _loadData();
-                },
-                child: Container(
-                  width: 20,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: task.isCompleted
-                          ? AppTheme.sage
-                          : AppTheme.textTertiary,
-                      width: 1.5,
-                    ),
-                    color: task.isCompleted
-                        ? AppTheme.sage
-                        : Colors.transparent,
-                  ),
-                  child: task.isCompleted
-                      ? const Icon(Icons.check, size: 13, color: Colors.white)
-                      : null,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: GestureDetector(
-                  onTap: () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => TodoDetailScreen(todo: task),
-                      ),
-                    );
-                    _loadData();
-                  },
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        task.title,
-                        style: AppTheme.sans(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: task.isCompleted
-                              ? AppTheme.textTertiary
-                              : AppTheme.textPrimary,
-                        ),
-                      ),
-                      if (task.notes.isNotEmpty) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          task.notes,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTheme.sans(
-                            fontSize: 12,
-                            color: AppTheme.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-              if (task.attachments.isNotEmpty) ...[
-                const SizedBox(width: 8),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.photo_outlined,
-                      size: 14,
-                      color: AppTheme.textTertiary,
-                    ),
-                    const SizedBox(width: 3),
-                    Text(
-                      '${task.attachments.length}',
-                      style: AppTheme.sans(
-                        fontSize: 11,
-                        color: AppTheme.textTertiary,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ],
-          ),
+
+        return TodoCard(
+          todo: task,
+          showBinderTag:
+              false, // Inside the folder, we don't need the folder badge
+          onToggleComplete: (val) async {
+            await _todoController.toggleComplete(task, val);
+            _loadData();
+          },
+          onTap: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => TodoDetailScreen(todo: task)),
+            );
+            _loadData();
+          },
+          onDelete: () async {
+            await _todoController.deleteTodo(task.id);
+            _loadData();
+          },
         );
       },
     );

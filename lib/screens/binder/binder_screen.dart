@@ -2,6 +2,7 @@ import 'package:binder/controllers/binder_controller.dart';
 import 'package:binder/controllers/todo_controller.dart';
 import 'package:binder/models/binder.dart';
 import 'package:binder/screens/binder/binder_detail_screen.dart';
+import 'package:binder/screens/binder/create_binder_screen.dart';
 import 'package:binder/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
@@ -85,7 +86,16 @@ class _BindersScreenState extends State<BindersScreen> {
               Icons.create_new_folder_outlined,
               color: AppTheme.terracotta,
             ),
-            onPressed: () {},
+            onPressed: () async {
+              final created = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CreateBinderScreen()),
+              );
+              // if created, reload the binders
+              if (created == true) {
+                _loadData();
+              }
+            },
           ),
         ],
       ),

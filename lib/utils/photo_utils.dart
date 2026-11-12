@@ -20,9 +20,9 @@ class PhotoUtils {
                 if (snapshot.hasData && snapshot.data != null) {
                   return AssetEntityImage(
                     snapshot.data!,
-                    isOriginal: false,
+                    isOriginal: true, // to preserve the quality
                     thumbnailSize: const ThumbnailSize.square(200),
-                    fit: BoxFit.cover,
+                    fit: BoxFit.contain,
                   );
                 }
                 return Container(color: AppTheme.surface);
