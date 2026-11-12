@@ -16,4 +16,20 @@ class Binder {
     required this.createdAt,
     required this.keywords,
   });
+
+  Binder copyWith({
+    String? name,
+    String? description,
+    String? colorHex,
+    String? keywords,
+  }) {
+    return Binder(
+      id: id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      colorHex: colorHex ?? this.colorHex,
+      createdAt: createdAt,
+      keywords: keywords ?? this.keywords,
+    );
+  }
 }

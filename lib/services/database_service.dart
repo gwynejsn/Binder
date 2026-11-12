@@ -64,10 +64,10 @@ class DatabaseService {
         // create Binders table
         await db.execute('''
           CREATE TABLE binders (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
             description TEXT,
-            color_hex TEXT
+            color_hex TEXT,
             created_at TEXT,
             keywords TEXT
           )
