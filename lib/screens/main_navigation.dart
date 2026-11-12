@@ -1,3 +1,4 @@
+import 'package:binder/screens/binder/binder_screen.dart';
 import 'package:binder/screens/todo/todo_screen.dart';
 import 'package:binder/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +21,13 @@ class MainNavigationState extends State<MainNavigation> {
       // https://api.flutter.dev/flutter/widgets/IndexedStack-class.html
       body: IndexedStack(
         index: _currentIndex,
-        children: [TodoScreen(), Container(), Container(), Container()],
+        children: [
+          TodoScreen(),
+          BindersScreen(),
+          Container(),
+          Container(),
+          Container(),
+        ],
       ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.only(left: 20, right: 20, bottom: 30, top: 4),
