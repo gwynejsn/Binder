@@ -275,7 +275,11 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
             // if selected tab is 0, go to create todo screen
             await Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => CreateTodoScreen()),
+              // we pass the binderId when coming from a binder from here in binder detail
+              // to like auto select to this binder
+              MaterialPageRoute(
+                builder: (_) => CreateTodoScreen(initialBinderId: _binderId),
+              ),
             );
             _loadData();
           } else {
