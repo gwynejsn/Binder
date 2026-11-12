@@ -350,7 +350,6 @@ class _TodoScreenState extends State<TodoScreen> {
                           ),
                         ),
                         _buildBinderTag(todo.binderId),
-
                         // deadline
                         if (todo.deadline != null)
                           Row(

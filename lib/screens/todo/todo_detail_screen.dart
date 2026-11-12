@@ -1,3 +1,4 @@
+import 'package:binder/controllers/binder_controller.dart';
 import 'package:binder/controllers/todo_controller.dart';
 import 'package:binder/models/enums/priority.dart';
 import 'package:binder/models/todo_attachment.dart';
@@ -7,6 +8,7 @@ import 'package:binder/theme/app_theme.dart';
 import 'package:binder/utils/color_utils.dart';
 import 'package:binder/utils/format_utils.dart';
 import 'package:binder/utils/photo_utils.dart';
+import 'package:binder/widgets/BinderSelector.dart';
 import 'package:flutter/material.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
@@ -23,12 +25,14 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
   final TodoController _todoController = TodoController();
   late TextEditingController _titleController;
   late TextEditingController _notesController;
+  final BinderController _binderController = BinderController();
 
   late Priority _selectedPriority;
   late DateTime? _selectedDeadline;
   late bool _isCompleted;
   late List<TodoAttachment> _attachments;
   bool _isSaving = false;
+  String? _selectedBinderId;
 
   @override
   void initState() {
@@ -39,6 +43,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
     _selectedDeadline = widget.todo.deadline;
     _isCompleted = widget.todo.isCompleted;
     _attachments = List<TodoAttachment>.from(widget.todo.attachments);
+    _selectedBinderId = widget.todo.binderId;
   }
 
   @override
@@ -84,7 +89,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
       notes: _notesController.text.trim(),
       priority: _selectedPriority,
       deadline: _selectedDeadline,
-      binderId: widget.todo.binderId,
+      binderId: _selectedBinderId,
       isCompleted: _isCompleted,
       completedPomodoros: widget.todo.completedPomodoros,
       createdAt: widget.todo.createdAt,
@@ -307,6 +312,12 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
                   ),
                 );
               }).toList(),
+            ),
+            const SizedBox(height: 20),
+            // binder
+            BinderSelector(
+              selectedBinderId: _selectedBinderId,
+              onSelected: (id) => setState(() => _selectedBinderId = id),
             ),
             const SizedBox(height: 24),
 
