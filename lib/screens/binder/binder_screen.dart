@@ -1,9 +1,13 @@
 import 'package:binder/controllers/binder_controller.dart';
+import 'package:binder/controllers/quick_pin_controller.dart';
 import 'package:binder/controllers/todo_controller.dart';
 import 'package:binder/models/binder.dart';
+import 'package:binder/models/quick_reference_pin.dart';
 import 'package:binder/screens/binder/binder_detail_screen.dart';
 import 'package:binder/screens/binder/create_binder_screen.dart';
+import 'package:binder/services/photo_service.dart';
 import 'package:binder/theme/app_theme.dart';
+import 'package:binder/utils/photo_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
@@ -18,6 +22,7 @@ class _BindersScreenState extends State<BindersScreen> {
   final BinderController _binderController = BinderController();
   final TodoController _todoController = TodoController();
   final TextEditingController _searchController = TextEditingController();
+  final QuickPinController _quickPinController = QuickPinController();
 
   String _searchQuery = '';
   bool _isLoading = true;
@@ -39,6 +44,222 @@ class _BindersScreenState extends State<BindersScreen> {
     await _todoController.loadTodos();
     if (mounted) {
       setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _confirmDeletePin(QuickReferencePin pin) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.surfaceElevated,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: AppTheme.border),
+        ),
+        title: Row(
+          children: [
+            const Icon(Icons.push_pin, size: 20, color: AppTheme.wheat),
+            const SizedBox(width: 8),
+            Text(
+              'Unpin Reference?',
+              style: AppTheme.serifHeading(fontSize: 18),
+            ),
+          ],
+        ),
+        content: Text(
+          'Remove "${pin.label}" from quick pins? (The photo will stay safe in your phone gallery).',
+          style: AppTheme.sans(fontSize: 13, color: AppTheme.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppTheme.textSecondary),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.rose,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Unpin'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await _quickPinController.deletePin(pin.id);
+      setState(() {});
+    }
+  }
+
+  Widget _buildQuickPinsSection() {
+    final pins = _quickPinController.pins;
+    if (pins.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      height: 44,
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        scrollDirection: Axis.horizontal,
+        itemCount: pins.length,
+        itemBuilder: (context, index) {
+          final pin = pins[index];
+
+          return GestureDetector(
+            onTap: () => PhotoUtils.openImageViewer(context, pin.assetId),
+            onLongPress: () => _confirmDeletePin(pin),
+            child: Container(
+              margin: const EdgeInsets.only(right: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppTheme.surfaceElevated,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppTheme.border),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 24,
+                    height: 24,
+                    decoration: const BoxDecoration(shape: BoxShape.circle),
+                    clipBehavior: Clip.antiAlias,
+                    child: FutureBuilder<AssetEntity?>(
+                      future: AssetEntity.fromId(pin.assetId),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData && snapshot.data != null) {
+                          return AssetEntityImage(
+                            snapshot.data!,
+                            isOriginal: false,
+                            thumbnailSize: const ThumbnailSize.square(100),
+                            fit: BoxFit.cover,
+                          );
+                        }
+                        return const Icon(
+                          Icons.push_pin,
+                          size: 12,
+                          color: AppTheme.wheat,
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    pin.label,
+                    style: AppTheme.sans(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _openAddQuickPinDialog() async {
+    // pick 1 photo from phone gallery using PhotoService
+    final assets = await PhotoService().pickPhotos(context, maxAssets: 1);
+    if (assets.isEmpty) return;
+
+    final asset = assets.first;
+    final labelController = TextEditingController();
+
+    if (!mounted) return;
+
+    //aask user for a short name/label
+    final save = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.surfaceElevated,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: AppTheme.border),
+        ),
+        title: Row(
+          children: [
+            const Icon(
+              Icons.push_pin_outlined,
+              size: 20,
+              color: AppTheme.wheat,
+            ),
+            const SizedBox(width: 8),
+            Text('Quick Pin Label', style: AppTheme.serifHeading(fontSize: 18)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Give this reference photo a short name for 1-tap access at the top of your screen.',
+              style: AppTheme.sans(fontSize: 12, color: AppTheme.textSecondary),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: labelController,
+              autofocus: true,
+              style: AppTheme.sans(fontSize: 14),
+              decoration: InputDecoration(
+                hintText: 'e.g. Class Schedule, Gym Pass, Wifi',
+                hintStyle: AppTheme.sans(color: AppTheme.textTertiary),
+                filled: true,
+                fillColor: AppTheme.surface,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: AppTheme.border),
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppTheme.textSecondary),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.terracotta,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Pin Photo'),
+          ),
+        ],
+      ),
+    );
+
+    // save the pin to SQLite
+    if (save == true) {
+      final label = labelController.text.trim();
+      await _quickPinController.addPin(
+        label: label.isEmpty ? 'Reference' : label,
+        assetId: asset.id,
+      );
+      setState(() {}); // refresh so the new pin pill shows immediately!
     }
   }
 
@@ -80,6 +301,12 @@ class _BindersScreenState extends State<BindersScreen> {
         centerTitle: false,
         title: Text('Binders', style: AppTheme.serifHeading(fontSize: 22)),
         actions: [
+          // quick pin add
+          IconButton(
+            icon: const Icon(Icons.push_pin_outlined, color: AppTheme.wheat),
+            tooltip: 'Quick Pin Photo',
+            onPressed: _openAddQuickPinDialog,
+          ),
           // add a new binder
           IconButton(
             icon: const Icon(
@@ -139,6 +366,9 @@ class _BindersScreenState extends State<BindersScreen> {
               ),
             ),
           ),
+          SizedBox(height: 8),
+          // quick pin
+          _buildQuickPinsSection(),
 
           // 2-column grid sa mga binders
           Expanded(
