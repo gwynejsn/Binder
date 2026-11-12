@@ -83,6 +83,15 @@ class DatabaseService {
             FOREIGN KEY (binder_id) REFERENCES binders (id) ON DELETE CASCADE
           )
         ''');
+
+        await db.execute('''
+          CREATE TABLE quick_pins (
+            id TEXT PRIMARY KEY,
+            label TEXT NOT NULL,
+            asset_id TEXT NOT NULL,
+            created_at TEXT NOT NULL
+          )
+        ''');
       },
     );
   }
