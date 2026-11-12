@@ -7,6 +7,7 @@ class Binder {
   // the keywords are separated by spaces (which we will embed later)
   // we will cosine similarity this with the embedded extracted texts from the photo
   final String keywords;
+  final List<String> photoAssetIds;
 
   Binder({
     required this.id,
@@ -15,6 +16,7 @@ class Binder {
     required this.colorHex,
     required this.createdAt,
     required this.keywords,
+    required this.photoAssetIds,
   });
 
   Binder copyWith({
@@ -22,6 +24,7 @@ class Binder {
     String? description,
     String? colorHex,
     String? keywords,
+    List<String>? photoAssetIds,
   }) {
     return Binder(
       id: id,
@@ -30,6 +33,7 @@ class Binder {
       colorHex: colorHex ?? this.colorHex,
       createdAt: createdAt,
       keywords: keywords ?? this.keywords,
+      photoAssetIds: photoAssetIds ?? this.photoAssetIds,
     );
   }
 }

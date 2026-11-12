@@ -1,7 +1,6 @@
 import 'package:binder/controllers/binder_controller.dart';
 import 'package:binder/controllers/todo_controller.dart';
 import 'package:binder/models/binder.dart';
-import 'package:binder/models/todo_attachment.dart';
 import 'package:binder/models/todo_item.dart';
 import 'package:binder/screens/binder/edit_binder_screen.dart';
 import 'package:binder/screens/todo/create_todo_screen.dart';
@@ -77,7 +76,11 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
 
   Future<void> _pickPhotosForBinder() async {
     final assets = await PhotoService().pickPhotos(context, maxAssets: 9);
-    if (assets.isNotEmpty) {}
+    if (assets.isNotEmpty) {
+      final ids = assets.map((a) => a.id).toList();
+      await _binderController.addPhotosToBinder(_binder.id, ids);
+      _loadData();
+    }
   }
 
   @override
@@ -96,9 +99,15 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
         .where((t) => t.binderId == _binder.id)
         .toList();
 
-    final allPhotos = <TodoAttachment>[];
+    final allPhotos = List<String>.from(_binder.photoAssetIds);
+
+    // also add photos attached from the todos
     for (final task in binderTasks) {
-      allPhotos.addAll(task.attachments);
+      for (final att in task.attachments) {
+        if (!allPhotos.contains(att.assetId)) {
+          allPhotos.add(att.assetId);
+        }
+      }
     }
 
     return Scaffold(
@@ -400,12 +409,28 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
     );
   }
 
-  Widget _buildPhotosView(List<TodoAttachment> photos) {
+  Widget _buildPhotosView(List<String> photos) {
     if (photos.isEmpty) {
       return Center(
-        child: Text(
-          'No photos in this folder yet',
-          style: AppTheme.sans(fontSize: 14, color: AppTheme.textTertiary),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.photo_library_outlined,
+              size: 48,
+              color: AppTheme.textTertiary,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'No photos in this folder yet',
+              style: AppTheme.sans(fontSize: 14, color: AppTheme.textTertiary),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Tap + below to add photos',
+              style: AppTheme.sans(fontSize: 12, color: AppTheme.textTertiary),
+            ),
+          ],
         ),
       );
     }
@@ -419,14 +444,26 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
       ),
       itemCount: photos.length,
       itemBuilder: (context, index) {
-        final attachment = photos[index];
+        final assetId = photos[index];
+        final isDirectPhoto = _binder.photoAssetIds.contains(assetId);
+
         return GestureDetector(
-          onTap: () {}, // TODO: add preview of photos
+          // tapping of the image will make it viewable
+          onTap: () => _openImageViewer(assetId),
+
+          // long press will prompt if gusto idelete
+          onLongPress: isDirectPhoto
+              ? () => _confirmDeletePhoto(assetId)
+              : null,
+
           child: Container(
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppTheme.border),
+            ),
             clipBehavior: Clip.antiAlias,
             child: FutureBuilder<AssetEntity?>(
-              future: AssetEntity.fromId(attachment.assetId),
+              future: AssetEntity.fromId(assetId),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done &&
                     snapshot.data != null) {
@@ -444,5 +481,85 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
         );
       },
     );
+  }
+
+  void _openImageViewer(String assetId) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.9),
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(12),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            InteractiveViewer(
+              child: FutureBuilder<AssetEntity?>(
+                future: AssetEntity.fromId(assetId),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData && snapshot.data != null) {
+                    return AssetEntityImage(
+                      snapshot.data!,
+                      isOriginal: true,
+                      fit: BoxFit.contain,
+                    );
+                  }
+                  return const Center(child: CircularProgressIndicator());
+                },
+              ),
+            ),
+            Positioned(
+              top: 10,
+              right: 10,
+              child: GestureDetector(
+                onTap: () => Navigator.pop(ctx),
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: const BoxDecoration(
+                    color: Colors.black54,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.close_rounded,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmDeletePhoto(String assetId) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.surfaceElevated,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Remove Photo?'),
+        content: const Text(
+          'Remove this photo from the folder? (The photo will stay in your phone gallery).',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.rose),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Remove', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await _binderController.deletePhotoFromBinder(_binder.id, assetId);
+      _loadData();
+    }
   }
 }

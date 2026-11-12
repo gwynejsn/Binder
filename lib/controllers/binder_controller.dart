@@ -35,6 +35,7 @@ class BinderController {
       colorHex: colorHex,
       createdAt: DateTime.now(),
       keywords: keywords,
+      photoAssetIds: [],
     );
 
     await _repo.insertBinder(newBinder);
@@ -54,5 +55,33 @@ class BinderController {
   Future<void> deleteBinder(String id) async {
     await _repo.deleteBinder(id);
     _binders.removeWhere((b) => b.id == id);
+  }
+
+  Future<void> addPhotosToBinder(String binderId, List<String> assetIds) async {
+    for (final assetId in assetIds) {
+      await _repo.addPhoto(binderId, assetId);
+    }
+
+    // find the binder
+    final index = _binders.indexWhere((b) => b.id == binderId);
+    if (index != -1) {
+      // if found, attach the photoIds
+      final current = _binders[index];
+      final updatedPhotos = List<String>.from(current.photoAssetIds)
+        ..addAll(assetIds);
+      _binders[index] = current.copyWith(photoAssetIds: updatedPhotos);
+    }
+  }
+
+  Future<void> deletePhotoFromBinder(String binderId, String assetId) async {
+    await _repo.deletePhoto(binderId, assetId);
+
+    final index = _binders.indexWhere((b) => b.id == binderId);
+    if (index != -1) {
+      final current = _binders[index];
+      final updatedPhotos = List<String>.from(current.photoAssetIds)
+        ..remove(assetId);
+      _binders[index] = current.copyWith(photoAssetIds: updatedPhotos);
+    }
   }
 }

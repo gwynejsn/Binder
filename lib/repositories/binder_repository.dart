@@ -16,8 +16,22 @@ class BinderRepository {
 
     final List<Binder> binders = [];
 
-    // we need to manually map again yung nasa db back to our model!
     for (final row in rows) {
+      final binderId = row['id'] as String;
+
+      // for each binder, fetch all the photos
+      final photoRows = await db.query(
+        'binder_photos',
+        where: 'binder_id = ?',
+        whereArgs: [binderId],
+        orderBy: 'created_at ASC',
+      );
+      // attach their id's in the photoAssetsIds
+      final photoAssetIds = photoRows
+          .map((p) => p['asset_id'] as String)
+          .toList();
+
+      // we need to manually map again yung nasa db back to our model!
       binders.add(
         Binder(
           id: row['id'] as String,
@@ -26,6 +40,7 @@ class BinderRepository {
           colorHex: row['color_hex'] as String,
           createdAt: DateTime.parse(row['created_at'] as String),
           keywords: row['keywords'] as String? ?? '',
+          photoAssetIds: photoAssetIds,
         ),
       );
     }
@@ -47,6 +62,17 @@ class BinderRepository {
     if (rows.isEmpty) return null;
 
     final row = rows.first;
+
+    final photoRows = await db.query(
+      'binder_photos',
+      where: 'binder_id = ?',
+      whereArgs: [id],
+      orderBy: 'created_at ASC',
+    );
+    final photoAssetIds = photoRows
+        .map((p) => p['asset_id'] as String)
+        .toList();
+
     return Binder(
       id: row['id'] as String,
       name: row['name'] as String,
@@ -54,6 +80,27 @@ class BinderRepository {
       colorHex: row['color_hex'] as String,
       createdAt: DateTime.parse(row['created_at'] as String),
       keywords: row['keywords'] as String? ?? '',
+      photoAssetIds: photoAssetIds,
+    );
+  }
+
+  // save the photo assetId with the binderId in the db (make reference sa photo)
+  Future<void> addPhoto(String binderId, String assetId) async {
+    final db = await _dbService.getDatabase();
+    await db.insert('binder_photos', {
+      'binder_id': binderId,
+      'asset_id': assetId,
+      'created_at': DateTime.now().toIso8601String(),
+    });
+  }
+
+  // delete from the db the photo reference
+  Future<void> deletePhoto(String binderId, String assetId) async {
+    final db = await _dbService.getDatabase();
+    await db.delete(
+      'binder_photos',
+      where: 'binder_id = ? AND asset_id = ?',
+      whereArgs: [binderId, assetId],
     );
   }
 
@@ -124,6 +171,7 @@ class BinderRepository {
         colorHex: '0xFF3B82F6',
         createdAt: DateTime.now(),
         keywords: 'canvas homework assignment study quiz exam problem set syllabus professor lecture due',
+        photoAssetIds: [],
       ),
       Binder(
         id: 'b_receipts',
@@ -132,6 +180,7 @@ class BinderRepository {
         colorHex: '0xFF10B981',
         createdAt: DateTime.now(),
         keywords: 'receipt payment total subtotal vat tax amount cashier php tender sale invoice change gcash card',
+        photoAssetIds: [],
       ),
       Binder(
         id: 'b_tabs',
@@ -140,6 +189,7 @@ class BinderRepository {
         colorHex: '0xFFEC4899',
         createdAt: DateTime.now(),
         keywords: 'guitar tabs chords capo fret tuning strumming acoustic song verse chorus tempo bpm tab',
+        photoAssetIds: [],
       ),
       Binder(
         id: 'b_places',
@@ -148,6 +198,7 @@ class BinderRepository {
         colorHex: '0xFFF59E0B',
         createdAt: DateTime.now(),
         keywords: 'food recipe ingredients bake baking oven cooking restaurant cafe meal dish dining menu flour sugar butter',
+        photoAssetIds: [],
       ),
     ];
 

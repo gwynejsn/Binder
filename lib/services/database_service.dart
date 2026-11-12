@@ -72,6 +72,17 @@ class DatabaseService {
             keywords TEXT
           )
         ''');
+
+        // create Binder photos table
+        await db.execute('''
+          CREATE TABLE binder_photos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            binder_id TEXT NOT NULL,
+            asset_id TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (binder_id) REFERENCES binders (id) ON DELETE CASCADE
+          )
+        ''');
       },
     );
   }
