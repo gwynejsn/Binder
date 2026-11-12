@@ -17,6 +17,7 @@ class MainNavigationState extends State<MainNavigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // https://api.flutter.dev/flutter/widgets/IndexedStack-class.html
       body: IndexedStack(children: [TodoScreen()]),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.only(left: 20, right: 20, bottom: 30, top: 4),

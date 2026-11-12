@@ -60,6 +60,18 @@ class DatabaseService {
             FOREIGN KEY (todo_id) REFERENCES todos (id) ON DELETE CASCADE
           )
         ''');
+
+        // create Binders table
+        await db.execute('''
+          CREATE TABLE binders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            description TEXT,
+            color_hex TEXT
+            created_at TEXT,
+            keywords TEXT
+          )
+        ''');
       },
     );
   }
