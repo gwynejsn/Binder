@@ -1,7 +1,6 @@
 import 'package:binder/controllers/binder_controller.dart';
 import 'package:binder/controllers/todo_controller.dart';
 import 'package:binder/models/binder.dart';
-import 'package:binder/models/todo_attachment.dart';
 import 'package:binder/screens/binder/binder_detail_screen.dart';
 import 'package:binder/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -146,19 +145,24 @@ class _BindersScreenState extends State<BindersScreen> {
                         ),
                     itemCount: displayedBinders.length,
                     itemBuilder: (context, index) {
-                      final binder = displayedBinders[index];
-
+                      final binder = allBinders[index];
                       final binderTasks = allTodos
                           .where((t) => t.binderId == binder.id)
                           .toList();
+
                       // count yung mga active todo inside each binder
                       final activeCount = binderTasks
                           .where((t) => !t.isCompleted)
                           .length;
 
-                      final binderPhotos = <TodoAttachment>[];
+                      // pagsamahin yung direct folder photos + photos attached from tasks/todos
+                      final binderPhotos = <String>[...binder.photoAssetIds];
                       for (final task in binderTasks) {
-                        binderPhotos.addAll(task.attachments);
+                        for (final att in task.attachments) {
+                          if (!binderPhotos.contains(att.assetId)) {
+                            binderPhotos.add(att.assetId);
+                          }
+                        }
                       }
 
                       return _buildBinderCard(
@@ -176,7 +180,7 @@ class _BindersScreenState extends State<BindersScreen> {
 
   Widget _buildBinderCard(
     Binder binder,
-    List<TodoAttachment> photos,
+    List<String> photos,
     int activeTaskCount,
   ) {
     final color = _parseColor(binder.colorHex);
@@ -258,7 +262,7 @@ class _BindersScreenState extends State<BindersScreen> {
   // parang pinterest where we have different collage depending on the
   // number of photos inside the binder
 
-  Widget _buildBoardCollage(List<TodoAttachment> photos, Color color) {
+  Widget _buildBoardCollage(List<String> photos, Color color) {
     // 0 photos
     if (photos.isEmpty) {
       return Container(
@@ -297,7 +301,9 @@ class _BindersScreenState extends State<BindersScreen> {
       return Container(
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(14)),
         clipBehavior: Clip.antiAlias,
-        child: SizedBox.expand(child: _buildThumb(topPhotos[0].assetId)),
+        child: SizedBox.expand(
+          child: _buildThumb(topPhotos[0]),
+        ), // <--- pass string directly
       );
     }
 
@@ -309,9 +315,9 @@ class _BindersScreenState extends State<BindersScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(child: _buildThumb(topPhotos[0].assetId)),
+            Expanded(child: _buildThumb(topPhotos[0])),
             const SizedBox(width: 2.5),
-            Expanded(child: _buildThumb(topPhotos[1].assetId)),
+            Expanded(child: _buildThumb(topPhotos[1])),
           ],
         ),
       );
@@ -324,16 +330,16 @@ class _BindersScreenState extends State<BindersScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(flex: 3, child: _buildThumb(topPhotos[0].assetId)),
+          Expanded(flex: 3, child: _buildThumb(topPhotos[0])),
           const SizedBox(width: 2.5),
           Expanded(
             flex: 2,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(child: _buildThumb(topPhotos[1].assetId)),
+                Expanded(child: _buildThumb(topPhotos[1])),
                 const SizedBox(height: 2.5),
-                Expanded(child: _buildThumb(topPhotos[2].assetId)),
+                Expanded(child: _buildThumb(topPhotos[2])),
               ],
             ),
           ),
