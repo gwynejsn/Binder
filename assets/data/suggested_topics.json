@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Receipts & Finances",
+    "colorHex": "0xFF10B981",
+    "keywords": "receipt, payment, total, subtotal, vat, tax, amount, cashier, php, tender, sale, invoice, change, gcash, maya, bank, transfer, reference no, paid, billing",
+    "description": "Financial receipts, invoices, bills, and transaction slips"
+  },
+  {
+    "name": "Academics & Study",
+    "colorHex": "0xFF3B82F6",
+    "keywords": "academics, school, canvas, blackboard, homework, assignment, study, quiz, exam, problem set, syllabus, professor, lecture, due, course, grades, test",
+    "description": "School assignments, lecture slides, study guides, and exams"
+  },
+  {
+    "name": "Food & Recipes",
+    "colorHex": "0xFFF59E0B",
+    "keywords": "recipe, ingredients, bake, baking, oven, cooking, restaurant, cafe, meal, dish, dining, menu, flour, sugar, butter, tablespoon, teaspoon, minutes, prep",
+    "description": "Cooking recipes, restaurant menus, and food inspiration"
+  },
+  {
+    "name": "Work & Projects",
+    "colorHex": "0xFF8B5CF6",
+    "keywords": "meeting, agenda, roadmap, jira, trello, github, slack, zoom, deadline, client, milestone, deliverable, presentation, slides, sprint, project",
+    "description": "Work notes, project roadmaps, and meeting agendas"
+  },
+  {
+    "name": "Travel & Places",
+    "colorHex": "0xFFEC4899",
+    "keywords": "flight, boarding pass, airline, terminal, gate, hotel, booking, itinerary, passport, visa, departure, arrival, trip, vacation, reservation",
+    "description": "Travel itineraries, flight bookings, and hotel confirmations"
+  },
+  {
+    "name": "Warranties & Manuals",
+    "colorHex": "0xFF7D8D70",
+    "keywords": "warranty, guarantee, serial, model, coverage, support, service, repairs, replacement, valid until, manual, instructions, troubleshooting",
+    "description": "Product warranties, serial numbers, and equipment manuals"
+  }
+]
