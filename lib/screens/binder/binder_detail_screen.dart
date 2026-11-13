@@ -114,6 +114,66 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
     }
   }
 
+  Future<void> _confirmDeleteSelectedPhotos() async {
+    if (_selectedPhotoIds.isEmpty) return;
+
+    // Filter to only direct photos in the binder
+    final directSelected = _selectedPhotoIds
+        .where((id) => _binder.photoAssetIds.contains(id))
+        .toList();
+
+    if (directSelected.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Selected photos are attached to tasks and cannot be removed directly from here.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    final count = directSelected.length;
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.surfaceElevated,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(count == 1 ? 'Remove Photo?' : 'Remove $count Photos?'),
+        content: Text(
+          count == 1
+              ? 'Remove this photo from "${_binder.name}"? (The photo will stay in your phone gallery).'
+              : 'Remove $count photos from "${_binder.name}"? (The photos will stay in your phone gallery).',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.rose),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Remove', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await _binderController.deletePhotosFromBinder(
+        _binder.id,
+        directSelected,
+      );
+      if (mounted) {
+        setState(() {
+          _selectedPhotoIds.clear();
+          _isSelectionMode = false;
+        });
+        _loadData();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -356,12 +416,12 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
         ],
       ),
 
-      // Bottom bar for Multi-Selection task creation
+      // Bottom bar for Multi-Selection: Delete or Create Task
       bottomNavigationBar: _isSelectionMode && _selectedTab == 1
           ? SafeArea(
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
+                  horizontal: 16,
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
@@ -377,6 +437,55 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
                 ),
                 child: Row(
                   children: [
+                    // Delete / Remove from Folder button
+                    GestureDetector(
+                      onTap: _selectedPhotoIds.isNotEmpty
+                          ? _confirmDeleteSelectedPhotos
+                          : null,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _selectedPhotoIds.isNotEmpty
+                              ? AppTheme.rose.withValues(alpha: 0.15)
+                              : AppTheme.surface,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: _selectedPhotoIds.isNotEmpty
+                                ? AppTheme.rose.withValues(alpha: 0.5)
+                                : AppTheme.border,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.delete_outline_rounded,
+                              color: _selectedPhotoIds.isNotEmpty
+                                  ? AppTheme.rose
+                                  : AppTheme.textTertiary,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Remove',
+                              style: TextStyle(
+                                color: _selectedPhotoIds.isNotEmpty
+                                    ? AppTheme.rose
+                                    : AppTheme.textTertiary,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+
+                    // Create Task Button
                     Expanded(
                       child: GestureDetector(
                         onTap: _selectedPhotoIds.isNotEmpty
@@ -404,7 +513,7 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
                               Text(
                                 _selectedPhotoIds.isNotEmpty
                                     ? 'Create Task (${_selectedPhotoIds.length})'
-                                    : 'Select photos to create task',
+                                    : 'Create Task',
                                 style: TextStyle(
                                   color: _selectedPhotoIds.isNotEmpty
                                       ? Colors.white
