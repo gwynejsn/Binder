@@ -13,10 +13,12 @@ import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 class CreateTodoScreen extends StatefulWidget {
   final String? initialBinderId;
   final String? initialAssetId;
+  final List<String>? initialAssetIds;
   const CreateTodoScreen({
     super.key,
     this.initialBinderId,
     this.initialAssetId,
+    this.initialAssetIds,
   });
 
   @override
@@ -38,8 +40,18 @@ class _CreateTaskScreenState extends State<CreateTodoScreen> {
   void initState() {
     super.initState();
     _selectedBinderId = widget.initialBinderId;
+    // Single photo passed
     if (widget.initialAssetId != null) {
       _attachments.add(TodoAttachment(assetId: widget.initialAssetId!));
+    }
+    // Multiple photos passed
+    if (widget.initialAssetIds != null) {
+      for (final id in widget.initialAssetIds!) {
+        final alreadyAttached = _attachments.any((a) => a.assetId == id);
+        if (!alreadyAttached) {
+          _attachments.add(TodoAttachment(assetId: id));
+        }
+      }
     }
   }
 

@@ -84,4 +84,21 @@ class BinderController {
       _binders[index] = current.copyWith(photoAssetIds: updatedPhotos);
     }
   }
+
+  Future<void> deletePhotosFromBinder(
+    String binderId,
+    List<String> assetIds,
+  ) async {
+    for (final assetId in assetIds) {
+      await _repo.deletePhoto(binderId, assetId);
+    }
+
+    final index = _binders.indexWhere((b) => b.id == binderId);
+    if (index != -1) {
+      final current = _binders[index];
+      final updatedPhotos = List<String>.from(current.photoAssetIds)
+        ..removeWhere((id) => assetIds.contains(id));
+      _binders[index] = current.copyWith(photoAssetIds: updatedPhotos);
+    }
+  }
 }

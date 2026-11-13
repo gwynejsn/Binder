@@ -80,14 +80,25 @@ class PhotoService {
     BuildContext context, {
     int maxAssets = 5,
   }) async {
-    final List<AssetEntity>? results = await AssetPicker.pickAssets(
-      context,
-      pickerConfig: AssetPickerConfig(
-        maxAssets: maxAssets,
-        requestType: RequestType.image,
-      ),
-    );
-    return results ?? [];
+    final hasPerm = await requestPermissions();
+    if (!hasPerm) {
+      debugPrint('Photo permission was denied by user');
+      return [];
+    }
+
+    try {
+      final List<AssetEntity>? results = await AssetPicker.pickAssets(
+        context,
+        pickerConfig: AssetPickerConfig(
+          maxAssets: maxAssets,
+          requestType: RequestType.image,
+        ),
+      );
+      return results ?? [];
+    } catch (e) {
+      debugPrint('AssetPicker error: $e');
+      return [];
+    }
   }
 
   //para sa batch deletion
