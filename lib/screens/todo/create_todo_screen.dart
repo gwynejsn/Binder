@@ -6,13 +6,18 @@ import 'package:binder/theme/app_theme.dart';
 import 'package:binder/utils/color_utils.dart';
 import 'package:binder/utils/format_utils.dart';
 import 'package:binder/utils/photo_utils.dart';
-import 'package:binder/widgets/BinderSelector.dart';
+import 'package:binder/widgets/binder_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 class CreateTodoScreen extends StatefulWidget {
   final String? initialBinderId;
-  const CreateTodoScreen({super.key, this.initialBinderId});
+  final String? initialAssetId;
+  const CreateTodoScreen({
+    super.key,
+    this.initialBinderId,
+    this.initialAssetId,
+  });
 
   @override
   State<CreateTodoScreen> createState() => _CreateTaskScreenState();
@@ -33,6 +38,9 @@ class _CreateTaskScreenState extends State<CreateTodoScreen> {
   void initState() {
     super.initState();
     _selectedBinderId = widget.initialBinderId;
+    if (widget.initialAssetId != null) {
+      _attachments.add(TodoAttachment(assetId: widget.initialAssetId!));
+    }
   }
 
   @override

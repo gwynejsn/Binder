@@ -1,4 +1,5 @@
 import 'package:binder/screens/binder/binder_screen.dart';
+import 'package:binder/screens/cleaner/cleaner_screen.dart';
 import 'package:binder/screens/todo/todo_screen.dart';
 import 'package:binder/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +25,7 @@ class MainNavigationState extends State<MainNavigation> {
         children: [
           TodoScreen(),
           BindersScreen(),
-          Container(),
+          CleanerScreen(),
           Container(),
           Container(),
         ],

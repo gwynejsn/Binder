@@ -3,6 +3,7 @@ import 'package:binder/theme/app_theme.dart';
 import 'package:binder/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 
+// sa may todo, when selecting which binder to assign it, ito yung widget
 class BinderSelector extends StatelessWidget {
   final String? selectedBinderId;
   final ValueChanged<String?> onSelected;
