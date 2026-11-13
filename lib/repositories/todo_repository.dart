@@ -68,6 +68,8 @@ class TodoRepository {
       'title': todo.title,
       'notes': todo.notes,
       'priority': todo.priority.name,
+      // https://medium.com/@nazhanfahmy1/dates-and-times-using-toiso8601string-in-dart-d6e9f45079ee
+      // it says there to use ISO 8601 to turn DateTime into String
       'deadline': todo.deadline?.toIso8601String(),
       'binder_id': todo.binderId,
       'is_completed': todo.isCompleted ? 1 : 0,

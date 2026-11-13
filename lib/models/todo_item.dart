@@ -27,6 +27,7 @@ class TodoItem {
     required this.createdAt,
   });
 
+  // a utility function for easy copying
   TodoItem copyWith({
     String? title,
     String? notes,

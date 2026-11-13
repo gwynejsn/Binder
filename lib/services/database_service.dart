@@ -60,6 +60,38 @@ class DatabaseService {
             FOREIGN KEY (todo_id) REFERENCES todos (id) ON DELETE CASCADE
           )
         ''');
+
+        // create Binders table
+        await db.execute('''
+          CREATE TABLE binders (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            description TEXT,
+            color_hex TEXT,
+            created_at TEXT,
+            keywords TEXT
+          )
+        ''');
+
+        // create Binder photos table
+        await db.execute('''
+          CREATE TABLE binder_photos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            binder_id TEXT NOT NULL,
+            asset_id TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (binder_id) REFERENCES binders (id) ON DELETE CASCADE
+          )
+        ''');
+
+        await db.execute('''
+          CREATE TABLE quick_pins (
+            id TEXT PRIMARY KEY,
+            label TEXT NOT NULL,
+            asset_id TEXT NOT NULL,
+            created_at TEXT NOT NULL
+          )
+        ''');
       },
     );
   }

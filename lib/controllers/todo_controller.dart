@@ -8,7 +8,8 @@ import 'package:binder/services/photo_service.dart';
 class TodoController {
   final TodoRepository _repo = TodoRepository();
 
-  List<TodoItem> _todos = [];
+  // static so that we only have 1 copy of the todos in our in-memory
+  static List<TodoItem> _todos = [];
   List<TodoItem> get allTodos => _todos;
 
   // load todos from the SQLite database

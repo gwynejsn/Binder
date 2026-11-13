@@ -26,6 +26,16 @@ class AppTheme {
   static const Color textSecondary = Color(0xFF9C9286);
   static const Color textTertiary = Color(0xFF6E655B);
 
+  static final List<String> binderColors = [
+    '0xFF3B82F6', // Blue
+    '0xFF10B981', // Emerald
+    '0xFFEC4899', // Pink
+    '0xFFF59E0B', // Amber
+    '0xFF8B5CF6', // Purple
+    '0xFFE09F5A', // Terracotta
+    '0xFF7D8D70', // Sage
+  ];
+
   // definition ng mga custom text styles
   static TextStyle serifHeading({
     double fontSize = 22,

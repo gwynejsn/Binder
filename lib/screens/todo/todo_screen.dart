@@ -1,12 +1,15 @@
+import 'package:binder/controllers/binder_controller.dart';
 import 'package:binder/controllers/todo_controller.dart';
 import 'package:binder/models/enums/priority.dart';
 import 'package:binder/models/enums/todo_filter.dart';
 import 'package:binder/models/todo_item.dart';
-import 'package:binder/screens/create_todo_screen.dart';
-import 'package:binder/screens/todo_detail_screen.dart';
+import 'package:binder/screens/todo/create_todo_screen.dart';
+import 'package:binder/screens/todo/todo_detail_screen.dart';
 import 'package:binder/theme/app_theme.dart';
+import 'package:binder/utils/color_utils.dart';
 import 'package:binder/utils/format_utils.dart';
 import 'package:binder/utils/photo_utils.dart';
+import 'package:binder/widgets/todo_card.dart';
 import 'package:flutter/material.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
@@ -21,6 +24,7 @@ class _TodoScreenState extends State<TodoScreen> {
   final TodoController _controller = TodoController();
   TodoFilter _filter = TodoFilter.active;
   bool _isLoading = true;
+  final BinderController _binderController = BinderController();
 
   @override
   void initState() {
@@ -127,9 +131,7 @@ class _TodoScreenState extends State<TodoScreen> {
     // returns true if saved or false if not
     final created = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(
-        builder: (_) => CreateTodoScreen(controller: _controller),
-      ),
+      MaterialPageRoute(builder: (_) => CreateTodoScreen()),
     );
 
     // after the task was saved, refresh the list
@@ -226,7 +228,13 @@ class _TodoScreenState extends State<TodoScreen> {
                     itemCount: displayedTodos.length,
                     itemBuilder: (context, index) {
                       final todo = displayedTodos[index];
-                      return _buildTodoCard(todo);
+                      return TodoCard(
+                        todo: todo,
+                        showBinderTag: true,
+                        onToggleComplete: (val) => _toggleComplete(todo, val),
+                        onTap: () => _openTodoDetails(todo),
+                        onDelete: () => _deleteTodo(todo.id),
+                      );
                     },
                   ),
           ),
@@ -348,7 +356,7 @@ class _TodoScreenState extends State<TodoScreen> {
                             ),
                           ),
                         ),
-
+                        _buildBinderTag(todo.binderId),
                         // deadline
                         if (todo.deadline != null)
                           Row(
@@ -484,15 +492,49 @@ class _TodoScreenState extends State<TodoScreen> {
   void _openTodoDetails(TodoItem todo) async {
     final updated = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(
-        builder: (_) => TodoDetailScreen(todo: todo, controller: _controller),
-      ),
+      MaterialPageRoute(builder: (_) => TodoDetailScreen(todo: todo)),
     );
 
     // if changes were saved or task was deleted, refresh the list!
     if (updated == true) {
       setState(() {});
     }
+  }
+
+  Widget _buildBinderTag(String? binderId) {
+    if (binderId == null) return const SizedBox.shrink();
+
+    // notice we access the stored in-memory list (the one with static)
+    // kaya mabilis sya!
+    final binder = _binderController.getBinderById(binderId);
+    if (binder == null) return const SizedBox.shrink();
+
+    final color = ColorUtils.getColor(binder.colorHex);
+
+    return Container(
+      margin: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.folder_rounded, size: 10, color: color),
+          const SizedBox(width: 4),
+          Text(
+            binder.name,
+            style: TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Color _priorityColor(Priority p) {
