@@ -90,6 +90,17 @@ class PhotoService {
     return results ?? [];
   }
 
+  //para sa batch deletion
+  Future<bool> deleteAssetsFromDevice(List<String> assetIds) async {
+    try {
+      final result = await PhotoManager.editor.deleteWithIds(assetIds);
+      return result.isNotEmpty;
+    } catch (e) {
+      debugPrint('Error deleting assets: $e');
+      return false;
+    }
+  }
+
   Future<bool> deleteAssetFromDevice(String assetId) async {
     try {
       final result = await PhotoManager.editor.deleteWithIds([assetId]);
