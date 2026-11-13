@@ -6,7 +6,7 @@ import 'package:binder/theme/app_theme.dart';
 import 'package:binder/utils/color_utils.dart';
 import 'package:binder/utils/format_utils.dart';
 import 'package:binder/utils/photo_utils.dart';
-import 'package:binder/widgets/BinderSelector.dart';
+import 'package:binder/widgets/binder_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 

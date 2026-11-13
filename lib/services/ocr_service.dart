@@ -26,7 +26,7 @@ class OcrService {
     _isInitialized = true;
   }
 
-  /// Loads the expandable RAG topics catalog from JSON
+  // load the suggested_topics.json file catalog
   Future<void> _loadTopicsCatalog() async {
     if (_isCatalogLoaded) return;
     try {
@@ -51,6 +51,7 @@ class OcrService {
     }
   }
 
+  // from scan AssetEntity using OCR and return the extracted text
   Future<String> recognizeTextFromAsset(AssetEntity asset) async {
     try {
       final File? file = await asset.file;
@@ -91,9 +92,6 @@ class OcrService {
     return analyzeText(rawText, existingBinders: existingBinders);
   }
 
-  /// Semantically matches screenshot text using Neural Vector Embeddings:
-  /// 1. Prioritizes user's existing binders (Name + Custom Keywords).
-  /// 2. If no binder matches with high confidence, searches RAG topics catalog.
   Future<SmartScanResult> analyzeText(
     String text, {
     List<Binder> existingBinders = const [],

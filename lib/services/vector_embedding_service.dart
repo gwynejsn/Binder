@@ -3,11 +3,14 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show rootBundle, ByteData;
+import 'package:mediapipe_core/mediapipe_core.dart';
 import 'package:mediapipe_text/mediapipe_text.dart';
 
 // this is the AI part which uses text_embedder to embed keywords into vector space
 // then we use cosine similarity to compare
 // https://developers.google.com/edge/mediapipe/solutions/text/text_embedder
+// note we are following the version 0.0.1 since the latest version is not working for some reason!
 class VectorEmbeddingService {
   TextEmbedder? _embedder;
   bool _isInitialized = false;
@@ -22,8 +25,17 @@ class VectorEmbeddingService {
     // gumagana lang sa android/ios
     if (!kIsWeb && (Platform.isIOS || Platform.isAndroid)) {
       try {
-        _embedder = await TextEmbedder.create(
-          TextEmbedderOptions(l2Normalize: true, quantize: false),
+        final ByteData modelBytes = await rootBundle.load(
+          'assets/models/universal_sentence_encoder.tflite',
+        );
+        _embedder = TextEmbedder(
+          TextEmbedderOptions.fromAssetBuffer(
+            modelBytes.buffer.asUint8List(),
+            embedderOptions: EmbedderOptions(
+              l2Normalize: true,
+              quantize: false,
+            ),
+          ),
         );
         _isInitialized = true;
         debugPrint(
@@ -82,7 +94,7 @@ class VectorEmbeddingService {
     if (a.embeddings.isEmpty || b.embeddings.isEmpty) return 0.0;
 
     try {
-      return TextEmbedder.cosineSimilarity(
+      return await _embedder!.cosineSimilarity(
         a.embeddings.first,
         b.embeddings.first,
       );
