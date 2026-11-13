@@ -1,4 +1,5 @@
 import 'package:binder/controllers/binder_controller.dart';
+import 'package:binder/controllers/todo_controller.dart';
 import 'package:binder/models/binder.dart';
 import 'package:binder/models/smart_scan_result.dart';
 import 'package:binder/models/suggested_topic.dart';
@@ -11,6 +12,7 @@ class CleanerController {
   final PhotoService _photoService = PhotoService();
   final OcrService _ocrService = OcrService();
   final BinderController _binderController = BinderController();
+  final TodoController _todoController = TodoController();
 
   static List<AssetEntity> _deck = [];
   static List<AssetEntity> _stagedForDeletion = [];
@@ -29,7 +31,24 @@ class CleanerController {
 
   Future<void> init() async {
     await _ocrService.init();
+    await _binderController.loadBinders();
+    await _todoController.loadTodos();
     await loadAlbumsAndPhotos();
+  }
+
+  Set<String> _getSavedAssetIds() {
+    final Set<String> saved = {};
+    for (final binder in _binderController.allBinders) {
+      for (final id in binder.photoAssetIds) {
+        saved.add(id);
+      }
+    }
+    for (final todo in _todoController.allTodos) {
+      for (final att in todo.attachments) {
+        saved.add(att.assetId);
+      }
+    }
+    return saved;
   }
 
   Future<void> loadAlbumsAndPhotos() async {
@@ -54,7 +73,12 @@ class CleanerController {
     _selectedAlbum = target;
 
     if (target != null) {
-      _deck = await _photoService.fetchAssetsForAlbum(target, pageSize: 40);
+      final savedIds = _getSavedAssetIds();
+      final rawAssets = await _photoService.fetchAssetsForAlbum(
+        target,
+        pageSize: 60,
+      );
+      _deck = rawAssets.where((asset) => !savedIds.contains(asset.id)).toList();
     } else {
       _deck = [];
     }
@@ -64,7 +88,13 @@ class CleanerController {
     _selectedAlbum = album;
     _scanCache.clear();
     _pendingScans.clear();
-    _deck = await _photoService.fetchAssetsForAlbum(album, pageSize: 40);
+
+    final savedIds = _getSavedAssetIds();
+    final rawAssets = await _photoService.fetchAssetsForAlbum(
+      album,
+      pageSize: 60,
+    );
+    _deck = rawAssets.where((asset) => !savedIds.contains(asset.id)).toList();
   }
 
   void stageForDeletion(AssetEntity photo) {
@@ -116,10 +146,12 @@ class CleanerController {
     }
   }
 
+  // put the photo to the binder
   Future<void> fileToExistingBinder(String binderId, String photoId) async {
     await _binderController.addPhotosToBinder(binderId, [photoId]);
   }
 
+  // create a new binder based on the suggested topic
   Future<Binder> createAndFileToRagTopic(
     SuggestedTopic topic,
     String photoId,
