@@ -27,7 +27,7 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
 
   late Binder _binder;
   String? _binderId;
-  int _selectedTab = 0; // 0 = tasks, 1 = photos
+  int _selectedTab = 1; // 0 = tasks, 1 = photos
   bool _isLoading = true;
 
   // Multi-selection state for photos
@@ -339,6 +339,35 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
             child: Row(
               children: [
                 Expanded(
+                  // select photos
+                  child: GestureDetector(
+                    onTap: () => setState(() => _selectedTab = 1),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: _selectedTab == 1
+                            ? AppTheme.surface
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(9),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Photos (${allPhotos.length})',
+                          style: AppTheme.sans(
+                            fontSize: 13,
+                            fontWeight: _selectedTab == 1
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                            color: _selectedTab == 1
+                                ? AppTheme.textPrimary
+                                : AppTheme.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
                   // select tasks
                   child: GestureDetector(
                     onTap: () {
@@ -373,35 +402,6 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
                     ),
                   ),
                 ),
-                Expanded(
-                  // select photos
-                  child: GestureDetector(
-                    onTap: () => setState(() => _selectedTab = 1),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      decoration: BoxDecoration(
-                        color: _selectedTab == 1
-                            ? AppTheme.surface
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(9),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Photos (${allPhotos.length})',
-                          style: AppTheme.sans(
-                            fontSize: 13,
-                            fontWeight: _selectedTab == 1
-                                ? FontWeight.w600
-                                : FontWeight.normal,
-                            color: _selectedTab == 1
-                                ? AppTheme.textPrimary
-                                : AppTheme.textSecondary,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
@@ -416,7 +416,8 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
         ],
       ),
 
-      // Bottom bar for Multi-Selection: Delete or Create Task
+      // this shows kung you are selecting
+      //bottom bar for Multi-Selection: Delete or Create Task
       bottomNavigationBar: _isSelectionMode && _selectedTab == 1
           ? SafeArea(
               child: Container(
@@ -437,7 +438,7 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
                 ),
                 child: Row(
                   children: [
-                    // Delete / Remove from Folder button
+                    //delete from Folder button
                     GestureDetector(
                       onTap: _selectedPhotoIds.isNotEmpty
                           ? _confirmDeleteSelectedPhotos
@@ -485,7 +486,7 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
                     ),
                     const SizedBox(width: 10),
 
-                    // Create Task Button
+                    //create Task Button
                     Expanded(
                       child: GestureDetector(
                         onTap: _selectedPhotoIds.isNotEmpty
@@ -533,7 +534,7 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
             )
           : null,
 
-      // Context-Aware Floating Button (hidden during selection mode)
+      //context-Aware Floating Button (hidden during selection mode)
       floatingActionButton: _isSelectionMode
           ? null
           : FloatingActionButton(
