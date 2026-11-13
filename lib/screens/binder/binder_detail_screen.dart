@@ -30,6 +30,10 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
   int _selectedTab = 0; // 0 = tasks, 1 = photos
   bool _isLoading = true;
 
+  // Multi-selection state for photos
+  bool _isSelectionMode = false;
+  final Set<String> _selectedPhotoIds = {};
+
   @override
   void initState() {
     super.initState();
@@ -84,6 +88,32 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
     }
   }
 
+  Future<void> _createTaskFromSelectedPhotos() async {
+    if (_selectedPhotoIds.isEmpty) return;
+
+    final selectedList = _selectedPhotoIds.toList();
+
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CreateTodoScreen(
+          initialBinderId: _binder.id,
+          initialAssetIds: selectedList,
+        ),
+      ),
+    );
+
+    if (mounted) {
+      setState(() {
+        _isSelectionMode = false;
+        _selectedPhotoIds.clear();
+      });
+      if (result == true) {
+        _loadData();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -116,17 +146,69 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: GestureDetector(
-          // back arrow
-          onTap: () => Navigator.pop(context),
-          child: const Icon(Icons.arrow_back_ios_new, size: 18),
-        ),
+        leading: _isSelectionMode && _selectedTab == 1
+            ? GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _isSelectionMode = false;
+                    _selectedPhotoIds.clear();
+                  });
+                },
+                child: const Icon(Icons.close_rounded, size: 22),
+              )
+            : GestureDetector(
+                // back arrow
+                onTap: () => Navigator.pop(context),
+                child: const Icon(Icons.arrow_back_ios_new, size: 18),
+              ),
+        title: _isSelectionMode && _selectedTab == 1
+            ? Text(
+                '${_selectedPhotoIds.length} Selected',
+                style: AppTheme.sans(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textPrimary,
+                ),
+              )
+            : null,
         actions: [
-          // edit this binder button
-          IconButton(
-            icon: const Icon(Icons.edit_outlined, size: 20),
-            onPressed: _openEditScreen,
-          ),
+          // Select toggle in Photos tab
+          if (_selectedTab == 1 && allPhotos.isNotEmpty)
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  if (!_isSelectionMode) {
+                    _isSelectionMode = true;
+                  } else {
+                    if (_selectedPhotoIds.length == allPhotos.length) {
+                      _selectedPhotoIds.clear();
+                      _isSelectionMode = false;
+                    } else {
+                      _selectedPhotoIds.addAll(allPhotos);
+                    }
+                  }
+                });
+              },
+              child: Text(
+                !_isSelectionMode
+                    ? 'Select'
+                    : (_selectedPhotoIds.length == allPhotos.length
+                          ? 'Deselect All'
+                          : 'Select All'),
+                style: const TextStyle(
+                  color: AppTheme.terracotta,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+
+          if (!_isSelectionMode)
+            // edit this binder button
+            IconButton(
+              icon: const Icon(Icons.edit_outlined, size: 20),
+              onPressed: _openEditScreen,
+            ),
         ],
       ),
       body: Column(
@@ -160,16 +242,17 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
                         _binder.name,
                         style: AppTheme.serifHeading(fontSize: 22),
                       ),
-                      if (_binder.description.isNotEmpty) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          _binder.description,
-                          style: AppTheme.sans(
-                            fontSize: 13,
-                            color: AppTheme.textSecondary,
+                      if (_binder.description.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(
+                            _binder.description,
+                            style: AppTheme.sans(
+                              fontSize: 13,
+                              color: AppTheme.textSecondary,
+                            ),
                           ),
                         ),
-                      ],
                       const SizedBox(height: 4),
                       Text(
                         '${binderTasks.length} tasks • ${allPhotos.length} photos',
@@ -198,7 +281,13 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
                 Expanded(
                   // select tasks
                   child: GestureDetector(
-                    onTap: () => setState(() => _selectedTab = 0),
+                    onTap: () {
+                      setState(() {
+                        _selectedTab = 0;
+                        _isSelectionMode = false;
+                        _selectedPhotoIds.clear();
+                      });
+                    },
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
@@ -262,36 +351,110 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
           Expanded(
             child: _selectedTab == 0
                 ? _buildTasksView(binderTasks)
-                : _buildPhotosView(allPhotos),
+                : _buildPhotosView(allPhotos, folderColor),
           ),
         ],
       ),
-      // Context-Aware Floating Button
-      floatingActionButton: FloatingActionButton(
-        heroTag: null,
-        backgroundColor: folderColor,
-        foregroundColor: Colors.white,
-        onPressed: () async {
-          if (_selectedTab == 0) {
-            // if selected tab is 0, go to create todo screen
-            await Navigator.push(
-              context,
-              // we pass the binderId when coming from a binder from here in binder detail
-              // to like auto select to this binder
-              MaterialPageRoute(
-                builder: (_) => CreateTodoScreen(initialBinderId: _binderId),
+
+      // Bottom bar for Multi-Selection task creation
+      bottomNavigationBar: _isSelectionMode && _selectedTab == 1
+          ? SafeArea(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceElevated,
+                  border: const Border(top: BorderSide(color: AppTheme.border)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.25),
+                      blurRadius: 10,
+                      offset: const Offset(0, -3),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: _selectedPhotoIds.isNotEmpty
+                            ? _createTaskFromSelectedPhotos
+                            : null,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: _selectedPhotoIds.isNotEmpty
+                                ? folderColor
+                                : AppTheme.surface,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.add_task_rounded,
+                                color: _selectedPhotoIds.isNotEmpty
+                                    ? Colors.white
+                                    : AppTheme.textTertiary,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                _selectedPhotoIds.isNotEmpty
+                                    ? 'Create Task (${_selectedPhotoIds.length})'
+                                    : 'Select photos to create task',
+                                style: TextStyle(
+                                  color: _selectedPhotoIds.isNotEmpty
+                                      ? Colors.white
+                                      : AppTheme.textTertiary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            );
-            _loadData();
-          } else {
-            // else let users pick and add photos
-            _pickPhotosForBinder();
-          }
-        },
-        child: Icon(
-          _selectedTab == 0 ? Icons.add : Icons.add_photo_alternate_outlined,
-        ),
-      ),
+            )
+          : null,
+
+      // Context-Aware Floating Button (hidden during selection mode)
+      floatingActionButton: _isSelectionMode
+          ? null
+          : FloatingActionButton(
+              heroTag: null,
+              backgroundColor: folderColor,
+              foregroundColor: Colors.white,
+              onPressed: () async {
+                if (_selectedTab == 0) {
+                  // if selected tab is 0, go to create todo screen
+                  await Navigator.push(
+                    context,
+                    // we pass the binderId when coming from a binder from here in binder detail
+                    // to like auto select to this binder
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          CreateTodoScreen(initialBinderId: _binderId),
+                    ),
+                  );
+                  _loadData();
+                } else {
+                  // else let users pick and add photos
+                  _pickPhotosForBinder();
+                }
+              },
+              child: Icon(
+                _selectedTab == 0
+                    ? Icons.add
+                    : Icons.add_photo_alternate_outlined,
+              ),
+            ),
     );
   }
 
@@ -335,7 +498,7 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
     );
   }
 
-  Widget _buildPhotosView(List<String> photos) {
+  Widget _buildPhotosView(List<String> photos, Color folderColor) {
     if (photos.isEmpty) {
       return Center(
         child: Column(
@@ -362,7 +525,7 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
     }
 
     return GridView.builder(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.fromLTRB(20, 10, 20, _isSelectionMode ? 80 : 20),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         crossAxisSpacing: 8,
@@ -372,36 +535,92 @@ class _BinderDetailScreenState extends State<BinderDetailScreen> {
       itemBuilder: (context, index) {
         final assetId = photos[index];
         final isDirectPhoto = _binder.photoAssetIds.contains(assetId);
+        final isSelected = _selectedPhotoIds.contains(assetId);
 
         return GestureDetector(
-          // tapping of the image will make it viewable
-          onTap: () => _openImageViewer(assetId),
+          // tapping of the image will make it viewable (or toggle selection)
+          onTap: () {
+            if (_isSelectionMode) {
+              setState(() {
+                if (isSelected) {
+                  _selectedPhotoIds.remove(assetId);
+                  if (_selectedPhotoIds.isEmpty) {
+                    _isSelectionMode = false;
+                  }
+                } else {
+                  _selectedPhotoIds.add(assetId);
+                }
+              });
+            } else {
+              _openImageViewer(assetId);
+            }
+          },
 
-          // long press will prompt if gusto idelete
-          onLongPress: isDirectPhoto
-              ? () => _confirmDeletePhoto(assetId)
-              : null,
+          // long press will prompt if gusto idelete (or enter selection mode)
+          onLongPress: () {
+            if (!_isSelectionMode) {
+              setState(() {
+                _isSelectionMode = true;
+                _selectedPhotoIds.add(assetId);
+              });
+            } else if (isDirectPhoto) {
+              _confirmDeletePhoto(assetId);
+            }
+          },
 
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppTheme.border),
+              border: Border.all(
+                color: isSelected ? folderColor : AppTheme.border,
+                width: isSelected ? 2 : 1,
+              ),
             ),
             clipBehavior: Clip.antiAlias,
-            child: FutureBuilder<AssetEntity?>(
-              future: AssetEntity.fromId(assetId),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done &&
-                    snapshot.data != null) {
-                  return AssetEntityImage(
-                    snapshot.data!,
-                    isOriginal: false,
-                    thumbnailSize: const ThumbnailSize.square(250),
-                    fit: BoxFit.cover,
-                  );
-                }
-                return Container(color: AppTheme.surfaceElevated);
-              },
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                FutureBuilder<AssetEntity?>(
+                  future: AssetEntity.fromId(assetId),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done &&
+                        snapshot.data != null) {
+                      return AssetEntityImage(
+                        snapshot.data!,
+                        isOriginal: false,
+                        thumbnailSize: const ThumbnailSize.square(250),
+                        fit: BoxFit.cover,
+                      );
+                    }
+                    return Container(color: AppTheme.surfaceElevated);
+                  },
+                ),
+
+                if (isSelected)
+                  Container(color: Colors.black.withValues(alpha: 0.35)),
+
+                if (_isSelectionMode)
+                  Positioned(
+                    top: 6,
+                    right: 6,
+                    child: Container(
+                      width: 22,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isSelected ? folderColor : Colors.black54,
+                        border: Border.all(color: Colors.white, width: 1.5),
+                      ),
+                      child: isSelected
+                          ? const Icon(
+                              Icons.check,
+                              size: 14,
+                              color: Colors.white,
+                            )
+                          : null,
+                    ),
+                  ),
+              ],
             ),
           ),
         );
