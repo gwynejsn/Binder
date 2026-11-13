@@ -18,23 +18,22 @@ class _EditBinderScreenState extends State<EditBinderScreen> {
   final BinderController _binderController = BinderController();
   late TextEditingController _nameController;
   late TextEditingController _descController;
-  late TextEditingController _keywordsController;
   late String _selectedColorHex;
+  late String _currentKeywords;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.binder.name);
     _descController = TextEditingController(text: widget.binder.description);
-    _keywordsController = TextEditingController(text: widget.binder.keywords);
     _selectedColorHex = widget.binder.colorHex;
+    _currentKeywords = widget.binder.keywords;
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _descController.dispose();
-    _keywordsController.dispose();
     super.dispose();
   }
 
@@ -42,11 +41,18 @@ class _EditBinderScreenState extends State<EditBinderScreen> {
     final name = _nameController.text.trim();
     if (name.isEmpty) return;
 
-    final updated = widget.binder.copyWith(
+    // if we ever update the keywords from another screen
+    // we need to refetch the binder
+    // also we track the current keywords since earlier there was
+    // a bug that deletes the already saved keywords when saving again
+    // as the binder here is not updated!
+    final latest =
+        _binderController.getBinderById(widget.binder.id) ?? widget.binder;
+    final updated = latest.copyWith(
       name: name,
       description: _descController.text.trim(),
       colorHex: _selectedColorHex,
-      keywords: _keywordsController.text.trim(),
+      keywords: _currentKeywords,
     );
 
     await _binderController.updateBinder(updated);
@@ -85,6 +91,11 @@ class _EditBinderScreenState extends State<EditBinderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final keywordCount = _currentKeywords
+        .split(' ')
+        .where((k) => k.trim().isNotEmpty)
+        .length;
+
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: AppBar(
@@ -181,16 +192,30 @@ class _EditBinderScreenState extends State<EditBinderScreen> {
               }).toList(),
             ),
             const SizedBox(height: 28),
+
             Center(
               child: GestureDetector(
                 onTap: () async {
-                  await Navigator.push(
+                  final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (_) =>
                           BinderKeywordsScreen(binderId: widget.binder.id),
                     ),
                   );
+
+                  // Update keywords in local state when returning from keywords screen
+                  if (result == true) {
+                    final latest = _binderController.getBinderById(
+                      widget.binder.id,
+                    );
+                    if (latest != null && mounted) {
+                      setState(() {
+                        // we track the keywords so it is consistent
+                        _currentKeywords = latest.keywords;
+                      });
+                    }
+                  }
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -203,18 +228,20 @@ class _EditBinderScreenState extends State<EditBinderScreen> {
                       color: AppTheme.terracotta.withValues(alpha: 0.5),
                     ),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.auto_awesome,
                         size: 18,
                         color: AppTheme.terracotta,
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Text(
-                        'Edit Keywords',
-                        style: TextStyle(
+                        keywordCount > 0
+                            ? 'Edit Keywords ($keywordCount)'
+                            : 'Edit Keywords',
+                        style: const TextStyle(
                           color: AppTheme.terracotta,
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
