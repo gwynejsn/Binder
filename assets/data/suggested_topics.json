@@ -2,133 +2,121 @@
   {
     "name": "Receipts & Expenses",
     "colorHex": "0xFF10B981",
-    "keywords": "receipt, payment, total, subtotal, vat, tax, amount, cashier, php, tender, sale, invoice, change, gcash, maya, bank, transfer, reference no, paid, billing, official receipt, transaction",
+    "keywords": "receipt payment total subtotal vat tax amount cashier php tender sale invoice change gcash maya bank transfer reference paid billing transaction",
     "description": "Financial receipts, invoices, bills, and transaction slips"
   },
   {
     "name": "Academics & Study",
     "colorHex": "0xFF3B82F6",
-    "keywords": "academics, school, canvas, blackboard, homework, assignment, study, quiz, exam, problem set, syllabus, professor, lecture, due, course, grades, test, university, college, thesis",
+    "keywords": "academics school canvas blackboard homework assignment study quiz exam syllabus professor lecture due course grades test university college thesis",
     "description": "School assignments, lecture slides, study guides, and exams"
   },
   {
     "name": "Food & Recipes",
     "colorHex": "0xFFF59E0B",
-    "keywords": "recipe, ingredients, bake, baking, oven, cooking, restaurant, cafe, meal, dish, dining, menu, flour, sugar, butter, tablespoon, teaspoon, minutes, prep, foodpanda, grabfood",
+    "keywords": "recipe ingredients bake baking oven cooking restaurant cafe meal dish dining menu flour sugar butter tablespoon teaspoon minutes prep foodpanda grabfood",
     "description": "Cooking recipes, restaurant menus, and food inspiration"
+  },
+  {
+    "name": "Accounts",
+    "colorHex": "0xFFEF4444",
+    "keywords": "account login username password email profile credentials signin signup register verification otp 2fa security recovery pin passcode bank e-wallet gcash maya",
+    "description": "User accounts, login credentials, security details, and financial or service profiles"
   },
   {
     "name": "Work & Projects",
     "colorHex": "0xFF8B5CF6",
-    "keywords": "meeting, agenda, roadmap, jira, trello, github, slack, zoom, deadline, client, milestone, deliverable, presentation, slides, sprint, project, standup, sync, report, kanban",
+    "keywords": "meeting agenda roadmap jira trello github slack zoom deadline client milestone deliverable presentation slides sprint project standup sync report kanban",
     "description": "Work notes, project roadmaps, deliverables, and meeting agendas"
   },
   {
     "name": "Travel & Boarding Passes",
     "colorHex": "0xFFEC4899",
-    "keywords": "flight, boarding pass, airline, terminal, gate, hotel, booking, itinerary, passport, visa, departure, arrival, trip, vacation, reservation, agoda, airbnb, cebu pacific, philippine airlines",
+    "keywords": "flight boarding airline terminal gate hotel booking itinerary passport visa departure arrival trip vacation reservation agoda airbnb cebupacific",
     "description": "Travel itineraries, flight bookings, and hotel confirmations"
   },
   {
     "name": "Warranties & Manuals",
     "colorHex": "0xFF7D8D70",
-    "keywords": "warranty, guarantee, serial, model, coverage, support, service, repairs, replacement, valid until, manual, instructions, troubleshooting, customer service, proof of purchase",
+    "keywords": "warranty guarantee serial model coverage support service repairs replacement valid manual instructions troubleshooting receipt",
     "description": "Product warranties, serial numbers, user guides, and equipment manuals"
   },
   {
     "name": "Shopping & Wishlists",
     "colorHex": "0xFFE11D48",
-    "keywords": "cart, checkout, discount, voucher, promo code, shopee, lazada, amazon, order placed, tracking number, parcel, delivery, courier, wishlist, price drop, flash sale",
+    "keywords": "cart checkout discount voucher promo shopee lazada amazon order tracking parcel delivery courier wishlist sale",
     "description": "Online shopping items, delivery tracking, wishlists, and voucher codes"
   },
   {
     "name": "Health & Medical",
     "colorHex": "0xFF06B6D4",
-    "keywords": "prescription, doctor, clinic, hospital, lab results, dosage, mg, tablets, capsule, pharmacy, mercury drug, diagnosis, medicine, physician, consultation, blood test",
+    "keywords": "prescription doctor clinic hospital lab dosage mg tablets capsule pharmacy mercury diagnosis medicine physician consultation blood",
     "description": "Medical prescriptions, doctor consultations, lab results, and medication guides"
   },
   {
     "name": "Fitness & Workouts",
     "colorHex": "0xFF14B8A6",
-    "keywords": "workout, gym, sets, reps, bench press, squat, deadlift, cardio, calories, running, pace, split, routine, protein, creatine, fitness, training, leg day",
+    "keywords": "workout gym sets reps bench squat deadlift cardio calories running pace split routine protein creatine fitness training",
     "description": "Workout routines, gym exercises, PR tracker, and fitness progress"
   },
   {
     "name": "Utility Bills & Subscriptions",
     "colorHex": "0xFF6366F1",
-    "keywords": "meralco, pldt, converge, globe, smart, water bill, electricity, internet, due date, account number, subscription, netflix, spotify, icloud, monthly fee, statement of account",
+    "keywords": "meralco pldt converge globe smart water electricity internet due account subscription netflix spotify icloud monthly statement",
     "description": "Monthly utility bills, internet statements, and recurring subscriptions"
   },
   {
     "name": "Tech & Coding",
     "colorHex": "0xFF4F46E5",
-    "keywords": "terminal, error, exception, stack trace, flutter, dart, python, javascript, api, endpoint, bug, docker, database, sql, pull request, code snippet, developer, debug",
+    "keywords": "terminal error exception stacktrace flutter dart python javascript api endpoint bug docker database sql code developer debug",
     "description": "Programming snippets, stack traces, API references, and dev notes"
   },
   {
     "name": "Beauty & Skincare",
     "colorHex": "0xFFF472B6",
-    "keywords": "skincare, serum, cleanser, sunscreen, spf, moisturizer, retinol, niacinamide, makeup, lipstick, foundation, shade, routine, toner, dermatological",
+    "keywords": "skincare serum cleanser sunscreen spf moisturizer retinol niacinamide makeup lipstick foundation shade routine toner dermatological",
     "description": "Skincare routines, cosmetics, beauty recommendations, and shade matches"
   },
   {
     "name": "Books & Reading",
     "colorHex": "0xFFD97706",
-    "keywords": "book, author, chapter, quote, novel, literature, kindle, goodreads, non-fiction, highlight, reading list, excerpt, summary, publication",
+    "keywords": "book author chapter quote novel literature kindle goodreads non-fiction highlight reading excerpt summary publication",
     "description": "Book highlights, literary quotes, reading lists, and author recommendations"
-  },
-  {
-    "name": "Home & Interior Decor",
-    "colorHex": "0xFFB45309",
-    "keywords": "furniture, ikea, aesthetic, interior design, room decor, lighting, couch, desk setup, bedroom, kitchen, curtain, dimension, floor plan, minimalist",
-    "description": "Interior design inspiration, furniture dimensions, and desk setup ideas"
   },
   {
     "name": "Finance & Investments",
     "colorHex": "0xFF059669",
-    "keywords": "stocks, crypto, portfolio, dividend, btc, eth,PSE, index fund, mutual fund, compounding, savings, yield, broker, market cap, asset allocation",
+    "keywords": "stocks crypto portfolio dividend btc eth pse index mutual compounding savings yield broker allocation",
     "description": "Investment portfolios, stock charts, crypto assets, and dividend trackers"
-  },
-  {
-    "name": "Events & Concerts",
-    "colorHex": "0xFFA855F7",
-    "keywords": "ticket, sm tickets, ticketnet, venue, seat, row, concert, festival, conference, wristband, qr code, admission, entry pass, event date, showtime",
-    "description": "Event tickets, concert passes, venue entrance QR codes, and seat numbers"
-  },
-  {
-    "name": "Automotive & Transport",
-    "colorHex": "0xFF64748B",
-    "keywords": "car, vehicle, grab, angkas, joyride, maintenance, change oil, tires, mileage, lto, license, registration, rfid, toll, parking, or cr",
-    "description": "Vehicle maintenance records, RFID accounts, parking tickets, and license info"
   },
   {
     "name": "Government & IDs",
     "colorHex": "0xFF0284C7",
-    "keywords": "valid id, passport, national id, sss, philhealth, pag-ibig, tin, birth certificate, nbi clearance, certificate, government, renewal, permit, appointment",
+    "keywords": "id passport national sss philhealth pag-ibig tin birth nbi clearance certificate government renewal permit appointment",
     "description": "Government IDs, official clearances, appointment slips, and certificates"
   },
   {
     "name": "Gaming & Entertainment",
     "colorHex": "0xFF7C3AED",
-    "keywords": "game, steam, playstation, nintendo, discord, patch notes, build, quest, guide, walkthrough, boss, achievement, movie, cinema, imdb, trailer",
+    "keywords": "game steam playstation nintendo discord patch build quest guide walkthrough boss achievement movie cinema imdb trailer",
     "description": "Game walkthroughs, builds, cinema schedules, and entertainment media"
   },
   {
-    "name": "Pets & Animals",
-    "colorHex": "0xFF16A34A",
-    "keywords": "vet, veterinary, vaccine, deworming, dog, cat, puppy, kitten, pet food, vaccination card, rabies, grooming, clinic, weight chart",
-    "description": "Pet vaccination records, veterinary appointments, and pet care instructions"
+    "name": "YouTube & Videos",
+    "colorHex": "0xFFDC2626",
+    "keywords": "youtube video channel subscribe playlist tutorial vlog shorts livestream watch timestamp creator podcast episode",
+    "description": "YouTube videos, saved tutorials, channels, and watchlists"
   },
   {
-    "name": "Quotes & Inspiration",
-    "colorHex": "0xFFEA580C",
-    "keywords": "quote, wisdom, mindset, motivational, poetry, verse, reflection, advice, philosophy, daily reminder, journaling, inspirational",
-    "description": "Motivational quotes, personal reflections, and journaling notes"
+    "name": "Music & Guitar Tabs",
+    "colorHex": "0xFFEAB308",
+    "keywords": "guitar tabs chords lyrics capo strumming fret acoustic electric bass riff solo tuning songsterr ultimate-guitar",
+    "description": "Guitar tabs, chord sheets, song lyrics, and instrument practice notes"
   },
   {
-    "name": "Memes & Social",
+    "name": "Google Forms & Surveys",
     "colorHex": "0xFF9333EA",
-    "keywords": "meme, funny, tweet, thread, viral, reddit, tiktok, instagram story, chat screenshot, humor, commentary, caption",
-    "description": "Saved memes, viral threads, funny chat screenshots, and social commentary"
+    "keywords": "gforms forms survey questionnaire poll response submit feedback evaluation registration typeform jotform docs.google.com/forms",
+    "description": "Google Forms links, online surveys, polls, and registration questionnaires"
   }
 ]
